@@ -15,7 +15,7 @@ class WeatherDataAnalyzer:
             "host": "localhost",
             "port": "5432"
         }
-        self.export_dir = "solar_analysis_data"
+        self.export_dir = "solar_analysis_data/data"
         if not os.path.exists(self.export_dir):
             os.makedirs(self.export_dir)
     
@@ -26,7 +26,6 @@ class WeatherDataAnalyzer:
         """Export ALL weather data fields for comprehensive solar analysis"""
         conn = self.connect()
         
-        # FIXED: Changed 'timestamp' to 'observation_time' to match your table schema
         query = """
             SELECT 
                 id, city, country, region, lat, lon, local_time,
