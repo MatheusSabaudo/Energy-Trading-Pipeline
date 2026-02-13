@@ -230,3 +230,4 @@ with DAG(
     )
     
     create_table_task >> load_weather_task
+    
