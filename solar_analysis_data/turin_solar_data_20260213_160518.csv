@@ -1,0 +1,2 @@
+city,temperature,humidity,wind_speed,cloudcover,uv_index,observation_time,date,hour,month,solar_angle,cloud_factor,temp_efficiency,uv_factor,solar_potential
+Turin,11.0,50,5,0,0,2026-02-13 15:00:30.229951,2026-02-13,15,2,0.7071067811865475,1.0,1.0,0.0,0.0
