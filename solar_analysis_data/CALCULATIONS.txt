@@ -1,0 +1,31 @@
+CALCULATE HOURLY PRODUCTION FROM THE PANELS:
+
+- CLOUD FACTOR:
+	We calculate a cloud factor between 0 and 1 to account for cloud cover.
+	1 → ideal conditions (clear sky, full sun)
+	0 → very cloudy (almost no sunlight reaching the panels)
+	This factor scales the solar potential linearly based on cloudiness.
+
+
+- TEMPERATURE:
+	Solar panel efficiency decreases at high temperatures.
+	We use a temperature loss coefficient (temp_loss_coeff) to model this effect.
+	If the outside temperature is above 25°C (Standard Test Conditions), the efficiency drops linearly according to the coefficient.
+	Below 25°C, no efficiency loss is applied.
+
+- UV FACTOR: 
+	Higher solar irradiance -> More potential solar output
+
+
+
+CALCULATE DAILY PRUDUCTION:
+
+	We calculated the daily production by summing the hourly kWh values for each day in the DataFrame.
+	For each date, all hourly production values were added together to get the total energy produced per day.
+
+
+
+CALCULATE MONTHLY PRUDUCTION:
+
+	We calculated the monthly production by summing the daily production kWh values for each day in the DataFrame.
+	For each month, all daily production values were added together to get the total energy produced in that month.
