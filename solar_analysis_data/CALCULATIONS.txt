@@ -1,7 +1,108 @@
+CONFIG FILE - TO DO:
+
+- Available Spacing for panels - Q1
+- Range for Cloud cover categories - Q1
+- Range for UV Index categories - Q1
+- Range for Wind Speed - Q1
+- Battery Size? - RESEARCH - Q1
+
+- PANEL_PARAMS - RESEARCH - Q2
+- Panel type (Polycrystalline, Monocrystalline, Premium (PERC), Experimental) and Efficiency - RESEARCH - Q2
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+START OF Q1
+
+Q1 Preliminary Meteorological Analysis:
+
+- TEMPERATURE:
+	From the temperature column we get the following data:
+	Average, Maximum, Minimum
+
+
+- CLOUD COVER:
+	From the 'cloudcover' column we get the following data:
+	Average, Maximum, Minimum, Std Deviation, Median
+	In order to calculate the clear_sky, partly_cloudy, cloudy and the total cloudcover
+	
+	Categories:
+	cloudcover > 20: Clear Sky
+	cloudcover > 20 and < 60: Partly Cloudy
+	cloudcover > 60: Cloudy
+
+	Daily cloud cover compared by dates:
+	- Average daily cloud
+	- Most cloudy day in the selected month
+	- Least cloudy day in the selected month
+
+
+- UV INDEX:
+	From the 'uv_index' column we get the following data:
+	Average, Maximum, Minimum, Std Deviation, Median
+	In order to calculate the intensity of the UV in the selected day
+	
+	Categories:
+	uv_index < 2: Low
+	uv_index > 2 and <= 5: Moderate
+	uv_index > 5: High
+
+	Importance in calculating the UV:
+	UV Index is a standard measurement of the strength of solar radiation.
+	It directly correlates with how much energy the sun is delivering to Earth's surface.
+	Affecting how much energy we're getting from the sun.
+
+
+- WIND SPEED:
+	From the 'wind_speed' column we get the following data:
+	Average, Maximum gusts, Minimum gusts, Std Deviation, Median
+	In order to calculate the intensity of the gusts
+
+	Categories:
+	wind_speed < 5: Calm
+	wind_speed >= 5 and < 20: Light
+	wind_speed >= 20 < 40: Moderate
+	wind_speed >= 40: Strong
+
+	Importance in calculating the Wind Speed:
+	1. When the outside temperature is above 25C the panels lose efficiency typically -0.3% to -0.5%
+	2. Wind speed helps to dissipate heat in hot conditions
+	3. Can help with the design factor so wind load calculations and soiling and cleaning
+
+
+- SOLAR ANGLE:
+	From the 'solar_angle' column we get the following data:
+	Average, Maximum, Minimum, Std Deviation, Median
+	In order to get the solar angle for the selected city
+	From the solar angle we calculated the peak and the lowest solar angle hour
+
+
+- SOLAR POTENTIAL:
+	From the 'solar_potential' column we get the following data:
+	Average, Maximum, Minimum, Std Deviation, Median
+	In order to calculate the production
+
+	Zero production analysis: if the solar_potential is 0 then the production will be 0 for the time in discussion.
+	Daily Potential: Taking in consideration the date and the solar potential we can calculate the daily average, best scenario and worst scenario.
+	Ratio calculation: Max of daily potential divided by the Min of daily potential
+
+
+- WORST CASE SCENARIO SIMULATION:
+	In order to get the best from the program, we also need to calculate the worst case scenario.
+	So we did calculate all the conditions taking only the worst data from the dataframe.
+	In case of consecutive bad days or natural disasters we calculated the needed battery sizing to maintain the energy running. # ADJUST
+	Consecutive bad days or natural disasters calculation: Min of Daily potential = Size required.   # ADJUST
+
+
+	
+END OF Q1
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+START OF Q2
+
+
 CALCULATE HOURLY PRODUCTION FROM THE PANELS:
 
 - CLOUD FACTOR:
-	We calculate a cloud factor between 0 and 1 to account for cloud cover.
+	We already calculated the percentage of the cloud cover in the Q1 analysis but we need the production factor in this case, so in this function we calculated how much sunlight actually reaches the panels in a range of 0.1 to 1.0 where higher number in the range, higher the solar production.
 	1 → ideal conditions (clear sky, full sun)
 	0 → very cloudy (almost no sunlight reaching the panels)
 	This factor scales the solar potential linearly based on cloudiness.
@@ -15,17 +116,39 @@ CALCULATE HOURLY PRODUCTION FROM THE PANELS:
 
 - UV FACTOR: 
 	Higher solar irradiance -> More potential solar output
+	Established in factors - Range 0.1, 1
 
 
+- PRODUCTION FACTOR: 
+	Calculated using solar_factor * cloud_factor * temp_efficiency * uv_factor 
+	In order to adapt to real-world conditions we need to apply the derating_factor into the production factor, multiplying them.
 
-CALCULATE DAILY PRUDUCTION:
+- HOURLY KWH CALCULATION:
+	Using the PANEL_PARAMS we need the panel_power, production_factor, panel_efficiency and the system_losses
+	Panel power: rated power output of a solar panel under Standard Test Conditions (STC).
+	Panel Efficiency: is the percentage of sunlight that gets converted into electricity depending on the panel type.
+	System Losses: represent all the energy that disappears between the solar panels, due to resistence in cables (DC wiring), connections (loose/oxidized), inverter efficiency (heat), AC wiring.
+
+	ADD TO THE PROJECT:
+	System losses:
+	- Soiling Loss (dirt on panels)
+	- Annual Degradation (aging)
+	- Availability Loss (Downtime)
+	Multi-year simulation: Simulation of the losses in 1, 3, 5, 7 and 10 years.
+
+
+- CALCULATE DAILY PRUDUCTION:
 
 	We calculated the daily production by summing the hourly kWh values for each day in the DataFrame.
 	For each date, all hourly production values were added together to get the total energy produced per day.
 
 
-
-CALCULATE MONTHLY PRUDUCTION:
+- CALCULATE MONTHLY PRUDUCTION:
 
 	We calculated the monthly production by summing the daily production kWh values for each day in the DataFrame.
 	For each month, all daily production values were added together to get the total energy produced in that month.
+
+CALCULATE ANNUAL PRODUCTION:
+	TO-DO
+
+
