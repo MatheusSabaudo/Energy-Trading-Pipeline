@@ -156,3 +156,50 @@ CALCULATE ANNUAL PRODUCTION:
 END OF Q2
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 START OF Q3
+
+
+- ECONOMIC PARAMETERS:
+	Get all the data made in research and calculate the installation cost taking in consideration the panel power
+	Data available from the econ params:
+	- Panel power
+ 	- Installation cost
+	- Annual maintenance
+	- Electricity Rate
+	- Sell-back Rate
+	- Incentive Rate
+	- Household consumption
+
+
+- SELF CONSUMPTION ANALYSIS:
+	We took in consideration the monthly total production in kWh, total of days in the selected month and the Average kWh
+	Monthly Consumption: Doing research we took an estimated value for a typical Italian family consumption in a year (2700 kWh/year)
+	For the self consumption we tested different strategies from 20% to 70% and for each percentage we calculated the production, a simulation if self consumed or grid injected (sold to grid).
+	
+	Example: 40% for self consumption and 60% for grid inject, how much would i save selling and using my own energy
+
+	We can calculate the savings multiplying the self consumed value with the electricity rate from the ECON PARAMS
+	We can calculate the revenue (selling excess to grid) multiplying the grid injected value with the sell back rate from the ECON PARAMS
+
+	Incentive (Italian project - Scambio sul posto): The government pays you for the energy fed into grid (up to what you consume)
+	Example: min(168 kWh, 225kWh) = 168 kWh x 0.12 eur = 20.16 eur of incentive
+
+	Total monthly benefit: Savings + Revenue + Incentive
+
+	Then as a result we took the Optimal scenario taking the lowest payback
+
+
+- LONG-TERM CASH FLOW ANALYSIS
+	We took seasonal factors for Turin of each month and calculated the February production using the adjustment factor based on Turin historical patterns
+	
+	From the Seasonal adjustment factor we can estimate the annual production (kWh) and the optimal scenario.
+	Taking into account the seasonal adjustment we also can estimate the savings, revenue, eligible and incentive just as before but calculation for the entire year.
+	
+	Cash flow analysis tracks every euro that comes in and goes out of your solar investment over its entire lifetime. It answers the question: "When will I get my money back, and how much will I ultimately earn?"
+
+
+	
+- SOLAR VS GRID COMPARISON
+	We compare the annual cost using standard electricity with the solar energy in order to get how much did we save and how much we'll save in 20 years.
+	We also calculated the Break-even electricity rate and the current rate.
+
+
