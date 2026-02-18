@@ -17,12 +17,12 @@ The **Energy Trading Pipeline** provides a structured ecosystem to:
 ---
 
 ## 🚀 Features
-
+```
 ✅ Airflow‑based orchestration
 ✅ PostgreSQL integration
 ✅ Solar data analysis pipeline
 ✅ Containerized deployment
-
+```
 ---
 
 ## 🗂️ Repository Structure
