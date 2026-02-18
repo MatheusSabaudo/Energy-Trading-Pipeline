@@ -165,8 +165,8 @@ These parameters feed directly into production and financial calculations.
 ```
 production_factor = solar_factor × cloud_factor × temp_efficiency × uv_factor × derating_factor
 ```
-
 Includes real-world derating.
+
 5. **Hourly kWh Calculation:**
 
 ```
