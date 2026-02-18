@@ -172,8 +172,8 @@ Includes real-world derating.
 ```
 hourly_kWh = production_factor × panel_power × panel_efficiency - system_losses
 ```
-
 System losses include soiling, degradation, availability, inverter losses.
+
 6. **Daily Aggregation:** sum hourly kWh per day.
 7. **Monthly Aggregation:** sum daily kWh per month.
 8. **Annual Production:** sum monthly kWh (planned).
