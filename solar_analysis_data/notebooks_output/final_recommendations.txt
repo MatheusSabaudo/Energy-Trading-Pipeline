@@ -1,0 +1,15 @@
+============================================================
+SOLAR PV ANALYSIS - FINAL RECOMMENDATIONS
+============================================================
+
+Date: 2026-02-18 11:42:47
+Location: Turin, Italy
+
+VERDICT: NOT RECOMMENDED
+Score: 20/100
+
+Recommended System: 6.0 kWp
+Payback Period: Never pays back
+20-year Profit: €-7,383
+ROI: -137%
+Coverage: 124.4%
