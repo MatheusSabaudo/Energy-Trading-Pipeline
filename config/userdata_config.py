@@ -1,22 +1,7 @@
 # config.py - Central configuration for Solar PV Analysis
 
 # ============================================
-# 1. LIBRARIES AND CSV LOADING
-# ============================================
-
-import pandas as pd
-import numpy as np
-from datetime import datetime
-import warnings
-import os
-import pickle
-print("Libraries imported successfully")
-
-df = pd.read_csv('data/turin_solar_data_20260213_160518.csv')
-print(f"Loaded Dataset {df.shape[0]} rows, {df.shape[1]} columns")
-
-# ============================================
-# 2. WEATHER CATEGORIES (Q1)
+# 1. WEATHER CATEGORIES (Q1)
 # ============================================
 
 CLOUD_CATEGORIES = {
@@ -39,7 +24,7 @@ WIND_CATEGORIES = {
 }
 
 # ============================================
-# 4. BATTERY CONFIGURATION (Q1 Research)
+# 2. BATTERY CONFIGURATION (Q1 Research)
 # ============================================
 
 BATTERY_PARAMS = {
@@ -52,7 +37,7 @@ BATTERY_PARAMS = {
 }
 
 # ============================================
-# 2. PANEL CONFIGURATION (Q2)
+# 3. PANEL CONFIGURATION (Q2)
 # ============================================
 
 PANEL_PARAMS = {
@@ -78,7 +63,7 @@ PANEL_PARAMS = {
 }
 
 # ============================================
-# 3. LOSS PARAMETERS (Q2)
+# 4. LOSS PARAMETERS (Q2)
 # ============================================
 
 LOSS_PARAMS = {
