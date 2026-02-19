@@ -31,7 +31,7 @@ BATTERY_PARAMS = {
     'include_battery': True,                # Enable/disable battery analysis
     'battery_capacity_kwh': 5.0,            # kWh storage
     'battery_efficiency': 0.90,             # 90% round-trip efficiency
-    'battery_cost_per_kwh': 600,            # € per kWh
+    'battery_cost_per_kwh': 450,            # € per kWh
     'battery_lifetime_years': 10,           # years until replacement
     'min_days_autonomy': 1,                 # days of backup without sun
 }
