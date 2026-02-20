@@ -11,7 +11,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("WEATHERSTACK_API_KEY", "YOUR_API_KEY")
+API_KEY = os.getenv("WEATHERSTACK_API_KEY", "YOUR_API_HERE")
 CITIES = ["Turin"]
 
 def create_table():
