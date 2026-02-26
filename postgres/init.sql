@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS weather_data (
     region VARCHAR(100),
     lat DECIMAL(10,6),
     lon DECIMAL(10,6),
-    localtime TIMESTAMP,
+    local_time TIMESTAMP,
     temperature DECIMAL(5,2),
     weather_code INT,
     weather_descriptions TEXT,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS weather_data (
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_weather_city ON weather_data(city);
 CREATE INDEX IF NOT EXISTS idx_weather_observation_time ON weather_data(observation_time);
-CREATE INDEX IF NOT EXISTS idx_weather_localtime ON weather_data(localtime);
+CREATE INDEX IF NOT EXISTS idx_weather_localtime ON weather_data(local_time);
 
 -- Create a view for daily summaries
 CREATE OR REPLACE VIEW daily_weather_summary AS
@@ -76,3 +76,18 @@ COMMENT ON TABLE weather_data IS 'Stores weather data from WeatherStack API for 
 COMMENT ON COLUMN weather_data.cloudcover IS 'Cloud cover percentage (0-100)';
 COMMENT ON COLUMN weather_data.uv_index IS 'UV index (0-11+)';
 COMMENT ON COLUMN weather_data.us_epa_index IS 'US EPA air quality index (1-6)';
+
+
+CREATE TABLE IF NOT EXISTS solar_panel_readings (
+    event_id VARCHAR(36) PRIMARY KEY,
+    timestamp TIMESTAMPTZ NOT NULL,
+    panel_id VARCHAR(20),
+    panel_type VARCHAR(50),
+    panel_power_kw FLOAT,
+    production_kw FLOAT,
+    temperature_c FLOAT,
+    cloud_factor FLOAT,
+    temp_efficiency FLOAT,
+    status VARCHAR(20),
+    city VARCHAR(50)
+);
