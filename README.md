@@ -31,34 +31,44 @@ Visualization and BI dashboards through Metabase
 
 ## 🗂️ Project Layout
 ```
-Energy‑Trading‑Pipeline/ config/\
-dags/\
-entrypoint/\
-postgres/\
-producers/\
-consumers/\
-solar_analysis_data/\
-dashboard/\
-docker‑compose.yaml\
-README.md
+Energy-Trading-Pipeline/
+├── config/                    # Environment & project configuration
+├── dags/                      # Airflow DAG definitions
+├── entrypoint/                # Startup scripts for containers
+├── postgres/                  # Database init & schema
+├── producers/                 # Data ingestion & tasks
+├── consumers/                 # Data transformation jobs
+├── solar_analysis_data/       # Solar & market datasets
+├── dashboard/                 # Metabase / visualization configs
+├── docker-compose.yaml        # Orchestration & service definitions
+└── README.md
 ```
 ------------------------------------------------------------------------
 
 ## 🧠 Pipeline Workflow
-
-Raw Data → Q1 Analysis → Q2 Production Modeling → Q3 Financial
-Simulation → Dashboards
+```
+Raw Weather & Market Data
+        ↓
+Preprocessing & Classification (Q1)
+        ↓
+Solar Production Modeling (Q2)
+        ↓
+Economic & Financial Simulation (Q3)
+        ↓
+Dashboards & Exportable Metrics
+```
 
 ------------------------------------------------------------------------
 
 ## 🏁 Getting Started
 
 Requirements: - Docker - Docker Compose - Python 3.8+
-
+```
 Clone & Run: git clone
 https://github.com/MatheusSabaudo/Energy-Trading-Pipeline.git\
 cd Energy-Trading-Pipeline\
 docker compose up --build
+```
 
 ------------------------------------------------------------------------
 
