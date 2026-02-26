@@ -30,7 +30,7 @@ Visualization and BI dashboards through Metabase
 ------------------------------------------------------------------------
 
 ## 🗂️ Project Layout
-
+```
 Energy‑Trading‑Pipeline/ config/\
 dags/\
 entrypoint/\
@@ -41,7 +41,7 @@ solar_analysis_data/\
 dashboard/\
 docker‑compose.yaml\
 README.md
-
+```
 ------------------------------------------------------------------------
 
 ## 🧠 Pipeline Workflow
