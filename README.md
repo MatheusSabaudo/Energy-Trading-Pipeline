@@ -102,13 +102,13 @@ docker compose up --build
 ------------------------------------------------------------------------
 
 ## 📊 Services
-
+```
   Service    URL
   ---------- -----------------------
   Airflow    http://localhost:8080
   pgAdmin    http://localhost:5050
   Metabase   http://localhost:3000
-
+```
 ------------------------------------------------------------------------
 
 ## 📈 Example Workflow
