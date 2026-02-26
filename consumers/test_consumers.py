@@ -9,7 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'config'))
 import userdata_config as cfg
 
 consumer = Consumer({
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': 'localhost:9093',
     'group.id': 'test-group',
     'auto.offset.reset': 'earliest'
 })

@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 
 # Kafka configuration
 KAFKA_CONF = {
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': 'localhost:9093',
     'group.id': 'solar-processor-group',
     'auto.offset.reset': 'earliest'
 }
 
 # PostgreSQL configuration
 PG_CONFIG = {
-    'dbname': 'solar_data',
+    'dbname': 'airflow',
     'user': 'airflow',
     'password': 'airflow',
     'host': 'localhost',
