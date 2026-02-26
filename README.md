@@ -247,4 +247,3 @@ MIT License --- © 2026 Matheus Sabaudo
 Issues and pull requests are welcome.
 
 ---
-
