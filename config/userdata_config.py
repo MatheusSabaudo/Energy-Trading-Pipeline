@@ -1,5 +1,16 @@
 # config.py - Central configuration for Solar PV Analysis
 
+# Add to config/userdata_config.py
+KAFKA_CONFIG = {
+    'bootstrap_servers': 'localhost:9092',  # For outside Docker
+    'bootstrap_servers_internal': 'kafka:9092',  # For inside Docker
+    'topics': {
+        'raw': 'solar-raw',
+        'processed': 'solar-processed',
+        'anomalies': 'solar-anomalies'
+    }
+}
+
 # ============================================
 # 1. WEATHER CATEGORIES (Q1)
 # ============================================
@@ -46,7 +57,8 @@ PANEL_PARAMS = {
     'panel_power_kw': 3.0,                  # kWp - nominal power under STC
     'panel_efficiency': 0.19,               # 19% - percentage of sunlight converted
     'panel_type': 'Monocrystalline',        # Polycrystalline, Monocrystalline, PERC, Experimental
-    
+    'temp_loss_coeff': 0.004,               # Temp loss Coefficient when Temp > 25
+
     # Physical dimensions
     'panel_width_m': 1.0,                   # meters
     'panel_height_m': 1.7,                  # meters
