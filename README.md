@@ -41,15 +41,16 @@ The **Energy Trading Pipeline** serves as an end‑to‑end environment for:
 
 ## 🗂️ Project Layout
 ```
-Energy‑Trading‑Pipeline/ ├── config/\
-├── dags/\
-├── entrypoint/\
-├── postgres/\
-├── producers/\
-├── consumers/\
-├── solar_analysis_data/\
-├── dashboard/\
-├── docker‑compose.yaml\
+Energy-Trading-Pipeline/
+├── config/                    # Environment & project configuration
+├── dags/                      # Airflow DAG definitions
+├── entrypoint/                # Startup scripts for containers
+├── postgres/                  # Database init & schema
+├── producers/                 # Data ingestion & tasks
+├── consumers/                 # Data transformation jobs
+├── solar_analysis_data/       # Solar & market datasets
+├── dashboard/                 # Metabase / visualization configs
+├── docker-compose.yaml        # Orchestration & service definitions
 └── README.md
 ```
 ------------------------------------------------------------------------
