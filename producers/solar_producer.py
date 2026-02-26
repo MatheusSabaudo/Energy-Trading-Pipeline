@@ -23,17 +23,17 @@ KAFKA_CONF = {
 
 producer = Producer(KAFKA_CONF)
 
-# Use values from your config
+# Use values from the /config/userdata_config
 PANEL_IDS = [f"PV-{i:03d}" for i in range(1, 11)]
 PANEL_POWER = cfg.PANEL_PARAMS['panel_power_kw']
-CITY = "Turin"  # or cfg.CITY if you have it in your config
+CITY = "Turin"  
 
 def delivery_report(err, msg):
     """Callback for message delivery"""
     if err is not None:
-        print(f"❌ Message delivery failed: {err}")
+        print(f"Message delivery failed: {err}")
     else:
-        print(f"✅ Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+        print(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 
 def generate_solar_event(panel_id):
     """Generate realistic solar production data using config values"""
@@ -49,13 +49,13 @@ def generate_solar_event(panel_id):
     cloud_factor = random.uniform(0.7, 1.0)
     temp = random.uniform(15, 30)
     
-    # Temperature efficiency loss (from your config)
+    # Temperature efficiency loss
     if temp > 25:
         temp_efficiency = 1 - (temp - 25) * cfg.PANEL_PARAMS['temp_loss_coeff']
     else:
         temp_efficiency = 1.0
     
-    # System losses from your config
+    # System losses
     system_losses = cfg.PANEL_PARAMS.get('system_losses', 0.14)
     
     actual_production = base_production * cloud_factor * temp_efficiency * (1 - system_losses)
@@ -75,7 +75,7 @@ def generate_solar_event(panel_id):
     }
 
 def main():
-    print("🌞 Solar Panel Data Producer Started")
+    print("    Solar Panel Data Producer Started")
     print(f"   City: {CITY}")
     print(f"   Panel power: {PANEL_POWER} kWp")
     print(f"   System losses: {cfg.PANEL_PARAMS.get('system_losses', 0.14)*100:.0f}%")
@@ -101,17 +101,17 @@ def main():
                 # Trigger delivery reports
                 producer.poll(0)
                 
-                print(f"📤 Sent: {panel_id} - {event['production_kw']} kW")
+                print(f"Sent: {panel_id} - {event['production_kw']} kW")
                 
                 # Small delay between messages
                 time.sleep(0.1)
             
             # Wait 5 seconds before next batch
-            print("⏳ Waiting 5 seconds...\n")
+            print("Waiting 5 seconds...\n")
             time.sleep(5)
             
     except KeyboardInterrupt:
-        print("\n👋 Shutting down producer...")
+        print("\nShutting down producer...")
     finally:
         # Flush remaining messages
         producer.flush()
