@@ -11,7 +11,7 @@ import userdata_config as cfg
 consumer = Consumer({
     'bootstrap.servers': 'localhost:9093',
     'group.id': 'test-group',
-    'auto.offset.reset': 'earliest'
+    'auto.offset.reset': 'earliest' # Get all the historical data from the producer
 })
 
 consumer.subscribe(['solar-raw'])
