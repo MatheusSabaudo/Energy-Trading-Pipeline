@@ -9,7 +9,6 @@ The Solar Pipeline is a complete data engineering solution that ingests weather 
 
 ## 📊 Architecture Diagram
 
-```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        DATA SOURCES                                  │
 └─────────────────────────────────────────────────────────────────────┘
@@ -66,7 +65,6 @@ The Solar Pipeline is a complete data engineering solution that ingests weather 
     │   Monitoring  │               │   Apache      │
     │   & Alerts    │               │   Airflow     │
     └───────────────┘               └───────────────┘
-```
 
 ## 🏛️ Architecture Layers
 
