@@ -153,11 +153,11 @@ graph TD
     C --> D[04_anomaly_detection]
     D --> E[05_pipeline_monitor]
     
-    style A fill:#90EE90
-    style B fill:#87CEEB
-    style C fill:#FFB6C1
-    style D fill:#FFA07A
-    style E fill:#DDA0DD
+    style A fill:#90EE90,color:#000000
+    style B fill:#87CEEB,color:#000000
+    style C fill:#FFB6C1,color:#000000
+    style D fill:#FFA07A,color:#000000
+    style E fill:#DDA0DD,color:#000000
 ```
 
 ## 🔐 Security
