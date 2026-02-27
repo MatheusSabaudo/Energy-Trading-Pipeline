@@ -1,13 +1,76 @@
 # config.py - Central configuration for Solar PV Analysis
 
-# Add to config/userdata_config.py
-KAFKA_CONFIG = {
-    'bootstrap_servers': 'localhost:9092',  # For outside Docker
-    'bootstrap_servers_internal': 'kafka:9092',  # For inside Docker
-    'topics': {
-        'raw': 'solar-raw',
-        'processed': 'solar-processed',
-        'anomalies': 'solar-anomalies'
+# config/userdata_config.py
+
+# ============================================
+# API CONFIGURATION
+# ============================================
+API_CONFIG = {
+    'weatherstack': {
+        'base_url': 'http://api.weatherstack.com',
+        'access_key': '2cfa7ad15ad224c023a84f5a980f6fda',  # Replace with your actual key
+        'endpoints': {
+            'current': '/current',
+            'historical': '/historical'
+        }
+    }
+}
+
+# ============================================
+# DATABASE CONFIGURATION
+# ============================================
+POSTGRES_CONFIG = {
+    'host': 'localhost',
+    'port': 5432,
+    'database': 'solar_data',
+    'user': 'airflow',
+    'password': 'airflow'
+}
+
+# ============================================
+# API DATA TABLE SCHEMA
+# ============================================
+API_TABLE_SCHEMA = {
+    'table_name': 'weather_data',
+    'columns': {
+        'id': 'SERIAL PRIMARY KEY',
+        'city': 'VARCHAR(100)',
+        'timestamp': 'TIMESTAMPTZ',
+        'temperature': 'DECIMAL(5,2)',
+        'humidity': 'INT',
+        'wind_speed': 'DECIMAL(5,2)',
+        'wind_direction': 'VARCHAR(10)',
+        'pressure': 'DECIMAL(7,2)',
+        'precipitation': 'DECIMAL(5,2)',
+        'cloud_cover': 'INT',
+        'uv_index': 'DECIMAL(3,1)',
+        'weather_code': 'INT',
+        'weather_description': 'VARCHAR(255)',
+        'is_day': 'BOOLEAN',
+        'observation_time': 'TIMESTAMPTZ',
+        'ingestion_timestamp': 'TIMESTAMPTZ DEFAULT NOW()'
+    }
+}
+
+# ============================================
+# IOT TABLE SCHEMA (for later)
+# ============================================
+IOT_TABLE_SCHEMA = {
+    'table_name': 'solar_panel_readings',
+    'columns': {
+        'id': 'SERIAL PRIMARY KEY',
+        'event_id': 'UUID UNIQUE',
+        'timestamp': 'TIMESTAMPTZ',
+        'panel_id': 'VARCHAR(50)',
+        'panel_type': 'VARCHAR(50)',
+        'panel_power_kw': 'DECIMAL(5,2)',
+        'production_kw': 'DECIMAL(8,3)',
+        'temperature_c': 'DECIMAL(5,1)',
+        'cloud_factor': 'DECIMAL(3,2)',
+        'temp_efficiency': 'DECIMAL(4,3)',
+        'status': 'VARCHAR(20)',
+        'city': 'VARCHAR(50)',
+        'ingestion_timestamp': 'TIMESTAMPTZ DEFAULT NOW()'
     }
 }
 
