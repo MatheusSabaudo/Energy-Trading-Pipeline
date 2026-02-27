@@ -15,14 +15,7 @@ import userdata_config as cfg
 # Kafka configuration - FIXED VERSION
 KAFKA_CONF = {
     'bootstrap.servers': 'localhost:9093',  # ONLY localhost
-    'client.id': 'solar-producer-1',
-    'acks': 'all',
-    'retries': 3,
-    # Temporarily disable idempotence to avoid dual connection
     'enable.idempotence': False,  
-    # Add these to help with connection
-    'socket.timeout.ms': 10000,
-    'session.timeout.ms': 45000
 }
 
 producer = Producer(KAFKA_CONF)

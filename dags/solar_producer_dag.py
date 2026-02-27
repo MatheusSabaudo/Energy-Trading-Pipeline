@@ -17,10 +17,6 @@ default_args = {
 def run_producer():
     """Run the solar producer - FIXED: Use absolute path inside container"""
     try:
-        # The producer is on your host, not in the container
-        # So we need to run it on the host via SSH or another method
-        
-        # Option 1: If producer is running on host, just check if it's running
         result = subprocess.run(
             ['pgrep', '-f', 'solar_producer.py'],
             capture_output=True,
@@ -30,8 +26,6 @@ def run_producer():
         if result.returncode == 0:
             return f"Producer already running with PID: {result.stdout.strip()}"
         else:
-            # Option 2: Start it on host (requires SSH or mounted volume)
-            # This is a placeholder - you may need to start it manually
             return "Producer not running - start manually on host"
             
     except Exception as e:
