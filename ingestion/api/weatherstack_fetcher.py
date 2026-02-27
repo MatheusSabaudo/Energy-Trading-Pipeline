@@ -1,192 +1,177 @@
-# weather_data_analyzer.py - FIXED VERSION
+# ingestion/api/weatherstack_fetcher.py
+import requests
 import psycopg2
-import pandas as pd
-from tabulate import tabulate
 from datetime import datetime
+import time
+import logging
+import sys
 import os
-import numpy as np
+from pathlib import Path
 
-class WeatherDataAnalyzer:
-    def __init__(self):
-        self.connection_params = {
-            "dbname": "airflow",
-            "user": "airflow",
-            "password": "airflow",
-            "host": "localhost",
-            "port": "5432"
-        }
-        self.export_dir = "solar_analysis_data/data"
-        if not os.path.exists(self.export_dir):
-            os.makedirs(self.export_dir)
-    
-    def connect(self):
-        return psycopg2.connect(**self.connection_params)
-    
-    def export_complete_weather_data(self, city="Turin"):
-        """Export ALL weather data fields for comprehensive solar analysis"""
-        conn = self.connect()
+# Add project root to path
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from config import userdata_config as cfg
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+class WeatherStackFetcher:
+    def __init__(self, city="Turin"):
+        self.city = city
+        self.api_config = cfg.API_CONFIG['weatherstack']
+        self.db_config = cfg.POSTGRES_CONFIG
+        self.base_url = self.api_config['base_url']
+        self.access_key = self.api_config['access_key']
         
-        query = """
-            SELECT 
-                id, city, country, region, lat, lon, local_time,
-                temperature, weather_code, weather_descriptions,
-                wind_speed, wind_degree, wind_dir, pressure, precip,
-                humidity, cloudcover, feelslike, uv_index, visibility,
-                sunrise, sunset, moon_phase, moon_illumination,
-                air_quality_co, air_quality_no2, air_quality_o3,
-                air_quality_so2, air_quality_pm2_5, air_quality_pm10,
-                us_epa_index, gb_defra_index, observation_time  -- FIXED: was 'timestamp'
-            FROM weather_data 
-            WHERE city = %s
-            ORDER BY observation_time  -- FIXED: was 'timestamp'
-        """
-        
-        df = pd.read_sql_query(query, conn, params=(city,))
-        conn.close()
-        
-        if df.empty:
-            print(f"No data found for {city}")
+    def fetch_current_weather(self):
+        """Fetch current weather from WeatherStack API"""
+        try:
+            url = f"{self.base_url}{self.api_config['endpoints']['current']}"
+            params = {
+                'access_key': self.access_key,
+                'query': self.city
+            }
+            
+            logger.info(f"Fetching weather data for {self.city}...")
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if 'error' in data:
+                logger.error(f"API Error: {data['error']['info']}")
+                return None
+                
+            return data
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error fetching weather data: {e}")
             return None
-        
-        # Parse timestamps
-        df['observation_time'] = pd.to_datetime(df['observation_time'])
-        df['date'] = df['observation_time'].dt.date
-        df['hour'] = df['observation_time'].dt.hour
-        df['month'] = df['observation_time'].dt.month
-        df['day_of_week'] = df['observation_time'].dt.dayofweek
-        
-        # Generate filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.export_dir}/{city.lower()}_complete_weather_{timestamp}.csv"
-        
-        # Save to CSV
-        df.to_csv(filename, index=False)
-        
-        print(f"\nComplete weather data exported to: {filename}")
-        print(f"Total records: {len(df)}")
-        print(f"Date range: {df['date'].min()} to {df['date'].max()}")
-        print(f"Fields included: {', '.join(df.columns[:10])}...")
-        
-        return filename
     
-    def export_solar_data(self, city="Turin"):
-        """Export simplified solar-relevant data"""
-        conn = self.connect()
-        
-        # Focus on solar-relevant fields
-        query = """
-            SELECT 
-                city,
-                temperature,
-                humidity,
-                wind_speed,
-                cloudcover,
-                uv_index,
-                observation_time
-            FROM weather_data 
-            WHERE city = %s
-            ORDER BY observation_time
-        """
-        
-        df = pd.read_sql_query(query, conn, params=(city,))
-        conn.close()
-        
-        if df.empty:
-            print(f"No data found for {city}")
+    def transform_weather_data(self, raw_data):
+        """Transform API response to database format"""
+        if not raw_data or 'current' not in raw_data:
             return None
+            
+        current = raw_data['current']
+        location = raw_data.get('location', {})
         
-        # Parse timestamps
-        df['observation_time'] = pd.to_datetime(df['observation_time'])
-        df['date'] = df['observation_time'].dt.date
-        df['hour'] = df['observation_time'].dt.hour
-        df['month'] = df['observation_time'].dt.month
+        # Fix: Parse the observation_time correctly
+        obs_time = current.get('observation_time')  # Format: "07:34 PM"
         
-        # Calculate solar potential
-        df['solar_potential'] = self.calculate_solar_potential(df)
+        # Convert to proper timestamp
+        if obs_time:
+            # Get today's date and combine with the time
+            today = datetime.now().date()
+            # Parse the time string
+            time_obj = datetime.strptime(obs_time, "%I:%M %p").time()
+            # Combine with today's date
+            full_timestamp = datetime.combine(today, time_obj)
+        else:
+            full_timestamp = datetime.now()
         
-        # Generate filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.export_dir}/{city.lower()}_solar_data_{timestamp}.csv"
-        df.to_csv(filename, index=False)
-        
-        print(f"\nSolar analysis data exported to: {filename}")
-        print(f"Total records: {len(df)}")
-        print(f"Date range: {df['date'].min()} to {df['date'].max()}")
-        
-        return filename
+        return {
+            'city': location.get('name', self.city),
+            'timestamp': datetime.now(),
+            'temperature': current.get('temperature'),
+            'humidity': current.get('humidity'),
+            'wind_speed': current.get('wind_speed'),
+            'wind_direction': current.get('wind_dir'),
+            'pressure': current.get('pressure'),
+            'precipitation': current.get('precip'),
+            'cloud_cover': current.get('cloudcover'),
+            'uv_index': current.get('uv_index'),
+            'weather_code': current.get('weather_code'),
+            'weather_description': current.get('weather_descriptions', [''])[0],
+            'is_day': current.get('is_day') == 'yes',
+            'observation_time': full_timestamp  # Now it's a proper timestamp
+    }
     
-    def calculate_solar_potential(self, df):
-        """Calculate solar energy potential based on weather conditions"""
-        # Solar angle factor (simplified - based on hour)
-        df['solar_angle'] = np.sin(np.radians(15 * (df['hour'] - 12)))
-        df['solar_angle'] = df['solar_angle'].clip(lower=0)
-        
-        # Cloud factor (0-1, higher clouds = lower factor)
-        df['cloud_factor'] = 1 - (df['cloudcover'] / 100)
-        df['cloud_factor'] = df['cloud_factor'].clip(lower=0.1, upper=1)
-        
-        # Temperature efficiency (panels work better in cooler temps)
-        df['temp_efficiency'] = 1 - (0.004 * (df['temperature'] - 25).clip(lower=0))
-        df['temp_efficiency'] = df['temp_efficiency'].clip(lower=0.7, upper=1)
-        
-        # UV index factor (proxy for solar intensity)
-        df['uv_factor'] = df['uv_index'] / 10
-        df['uv_factor'] = df['uv_factor'].clip(lower=0, upper=1)
-        
-        # Combined solar potential (0-1 scale)
-        df['solar_potential'] = (
-            df['solar_angle'] * 
-            df['cloud_factor'] * 
-            df['temp_efficiency'] * 
-            df['uv_factor']
-        ).clip(lower=0, upper=1)
-        
-        return df['solar_potential']
+    def save_to_postgres(self, data):
+        """Save transformed data to PostgreSQL"""
+        if not data:
+            return False
+            
+        try:
+            conn = psycopg2.connect(**self.db_config)
+            cur = conn.cursor()
+            
+            insert_query = """
+                INSERT INTO weather_data (
+                    city, timestamp, temperature, humidity, wind_speed,
+                    wind_direction, pressure, precipitation, cloud_cover,
+                    uv_index, weather_code, weather_description, is_day,
+                    observation_time
+                ) VALUES (
+                    %(city)s, %(timestamp)s, %(temperature)s, %(humidity)s,
+                    %(wind_speed)s, %(wind_direction)s, %(pressure)s,
+                    %(precipitation)s, %(cloud_cover)s, %(uv_index)s,
+                    %(weather_code)s, %(weather_description)s, %(is_day)s,
+                    %(observation_time)s
+                )
+            """
+            
+            cur.execute(insert_query, data)
+            conn.commit()
+            
+            logger.info(f"Weather data saved for {data['city']}")
+            
+            cur.close()
+            conn.close()
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error saving to PostgreSQL: {e}")
+            # Log the data that caused the error for debugging
+            logger.debug(f"Problematic data: {data}")
+            return False
     
-    def get_statistics(self):
-        """Get basic statistics from the data"""
-        conn = self.connect()
+    def run_once(self):
+        """Run one fetch and save cycle"""
+        logger.info("=" * 60)
+        logger.info("Starting WeatherStack API fetch")
         
-        query = """
-            SELECT 
-                city,
-                COUNT(*) as total_readings,
-                MIN(temperature) as min_temp,
-                MAX(temperature) as max_temp,
-                AVG(temperature)::numeric(10,2) as avg_temp,
-                AVG(humidity)::numeric(10,2) as avg_humidity,
-                AVG(wind_speed)::numeric(10,2) as avg_wind_speed,
-                AVG(cloudcover)::numeric(10,2) as avg_cloudcover,
-                MIN(observation_time) as first_record,
-                MAX(observation_time) as last_record
-            FROM weather_data 
-            GROUP BY city
-            ORDER BY city
-        """
+        raw_data = self.fetch_current_weather()
+        if raw_data:
+            transformed = self.transform_weather_data(raw_data)
+            if transformed:
+                self.save_to_postgres(transformed)
+                logger.info("Weather data fetch complete")
+            else:
+                logger.error("Failed to transform weather data")
+        else:
+            logger.error("Failed to fetch weather data")
+    
+    def run_continuous(self, interval_minutes=15):
+        """Run continuously at specified interval"""
+        logger.info(f"Starting continuous fetch every {interval_minutes} minutes")
         
-        df = pd.read_sql_query(query, conn)
-        conn.close()
-        
-        print("\n" + "=" * 60)
-        print("WEATHER DATA STATISTICS")
-        print("=" * 60)
-        print(tabulate(df, headers='keys', tablefmt='grid', showindex=False))
-        
-        return df
+        try:
+            while True:
+                self.run_once()
+                logger.info(f"Waiting {interval_minutes} minutes until next fetch...")
+                time.sleep(interval_minutes * 60)
+                
+        except KeyboardInterrupt:
+            logger.info("Stopping weather fetcher")
 
 if __name__ == "__main__":
-    analyzer = WeatherDataAnalyzer()
+    # Parse command line arguments
+    import argparse
+    parser = argparse.ArgumentParser(description='WeatherStack API Fetcher')
+    parser.add_argument('--city', default='Turin', help='City to fetch weather for')
+    parser.add_argument('--continuous', action='store_true', help='Run continuously')
+    parser.add_argument('--interval', type=int, default=15, help='Interval in minutes')
     
-    # Show statistics first
-    analyzer.get_statistics()
+    args = parser.parse_args()
     
-    # Export data for solar analysis
-    print("\n" + "=" * 60)
-    csv_file = analyzer.export_solar_data(city="Turin")
+    fetcher = WeatherStackFetcher(city=args.city)
     
-    if csv_file:
-        print(f"\nData ready for solar analysis in Jupyter!")
-        print(f"Load it with:")
-        print(f'    import pandas as pd')
-        print(f'    df = pd.read_csv("{csv_file}")')
-        print(f'    df.head()')
+    if args.continuous:
+        fetcher.run_continuous(interval_minutes=args.interval)
+    else:
+        fetcher.run_once()
