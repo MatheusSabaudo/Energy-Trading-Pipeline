@@ -10,7 +10,7 @@
 
 ## 📋 Project Overview
 
-A **complete end-to-end data pipeline** for solar panel monitoring, implementing the **medallion architecture** (Bronze, Silver, Gold layers). The project simulates IoT solar panel data, streams it through Kafka, stores it in PostgreSQL, and transforms it through multiple refinement layers in SQL Server for business intelligence.
+A **complete end-to-end data pipeline** for solar panel monitoring, implementing the **medallion architecture (Bronze, Silver, Gold layers)**. The project simulates IoT solar panel data, streams it through Kafka, stores it in PostgreSQL, and transforms it through multiple refinement layers for business intelligence and analytics.
 
 ### 🎯 Key Features
 
