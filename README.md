@@ -1,4 +1,4 @@
-# ☀️ Solar Energy Trading Pipeline
+# ☀️ Solar Energy Data Pipeline
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![Kafka](https://img.shields.io/badge/Apache%20Kafka-4.0.1-red)](https://kafka.apache.org/)
@@ -9,18 +9,24 @@
 
 ## 📋 Project Overview
 
-A **complete end-to-end data pipeline** for solar panel monitoring, implementing the **medallion architecture** (Bronze, Silver, Gold layers). The project simulates IoT solar panel data, streams it through Kafka, stores it in PostgreSQL, and transforms it through multiple refinement layers for business intelligence.
+A complete end-to-end data pipeline for solar panel monitoring, implementing the **medallion architecture** (Bronze, Silver, Gold layers). The project simulates IoT solar panel data, streams it through Kafka, stores it in PostgreSQL, and transforms it through multiple refinement layers for business intelligence and analytics.
 
 ### 🎯 Key Features
 
 - **Real-time IoT Simulation**: Python producer generating realistic solar panel data for 10 panels
 - **Weather Data Integration**: WeatherStack API integration for environmental context
-- **Streaming Pipeline**: Apache Kafka for message brokering
+- **Streaming Pipeline**: Apache Kafka for message brokering (port 9093)
 - **Medallion Architecture**: Bronze (raw), Silver (cleaned), Gold (aggregated) layers
 - **Data Quality Framework**: Validation rules, quality flags, anomaly detection
 - **Pipeline Orchestration**: Apache Airflow DAGs for scheduling
 - **Comprehensive Monitoring**: Health checks, data freshness, quality metrics
 - **Fully Containerized**: Easy deployment with Docker Compose
+
+---
+
+## 📊 Feasibility Analysis
+
+Comprehensive feasibility analysis for the installation of photovoltaic panels in Turin. The project processes real meteorological data to calculate potential energy production, evaluates different self-consumption strategies (20–70%), and provides a detailed economic analysis including ROI, payback period, and profit over 20–25 years.
 
 ---
 
@@ -99,22 +105,22 @@ Energy-Trading-Pipeline/
 │   ├── 📁 api/                          # Weather API
 │   │   └── weatherstack_fetcher.py      # WeatherStack API client
 │   ├── 📁 iot/                          # IoT simulation
-│   │   ├── solar_producer.py             # Kafka producer
-│   │   └── iot_to_postgres.py            # Kafka consumer
+│   │   ├── solar_producer.py            # Kafka producer
+│   │   └── iot_to_postgres.py           # Kafka consumer
 │   └── 📁 scripts/                       # Utility scripts
-│       └── create-topics.sh               # Kafka topic setup
+│       └── create-topics.sh              # Kafka topic setup
 │
 ├── 📁 postgres/                          # Database scripts
-│   ├── 📁 init/                           # Initialization
-│   │   └── init.sql                        # Database schema
-│   ├── 📁 bronze/                          # Bronze layer
+│   ├── 📁 init/                          # Initialization
+│   │   └── init.sql                       # Database schema
+│   ├── 📁 bronze/                         # Bronze layer
 │   │   ├── ddl_bronze.sql
 │   │   └── data_verify.sql
-│   ├── 📁 silver/                          # Silver layer
+│   ├── 📁 silver/                         # Silver layer
 │   │   ├── ddl_silver.sql
 │   │   ├── silver_load.sql
 │   │   └── data_verify.sql
-│   └── 📁 gold/                            # Gold layer
+│   └── 📁 gold/                           # Gold layer
 │       ├── ddl_gold.sql
 │       ├── gold_load_daily.sql
 │       ├── gold_load_hourly.sql
@@ -123,13 +129,13 @@ Energy-Trading-Pipeline/
 │       └── data_verify.sql
 │
 ├── 📁 orchestration/                      # Airflow orchestration
-│   ├── 📁 dags/                            # DAG definitions
+│   ├── 📁 dags/                           # DAG definitions
 │   │   ├── 01_ingestion_dag.py
 │   │   ├── 02_silver_transform_dag.py
 │   │   ├── 03_gold_load_dag.py
 │   │   ├── 04_anomaly_detection_dag.py
 │   │   └── 05_pipeline_monitor_dag.py
-│   └── 📁 scripts/                          # Utility scripts
+│   └── 📁 scripts/                         # Utility scripts
 │       ├── check_kafka.py
 │       ├── check_postgres.py
 │       └── alert.py
@@ -145,7 +151,7 @@ Energy-Trading-Pipeline/
 │   └── setup_guide.md
 │
 ├── 🐳 docker-compose.yml                    # Docker services
-├── 📝 requirements.txt                       # Python dependencies
+├── 📝 requirements.txt                      # Python dependencies
 └── 📚 README.md                              # This file
 ```
 
@@ -209,19 +215,11 @@ python ingestion/api/weatherstack_fetcher.py --city Turin --continuous
 
 ### 2. **Medallion Transformations**
 
-#### Bronze Layer (Raw Data)
-- `weather_data`: Raw weather observations
-- `solar_panel_readings`: Raw IoT sensor data
-
-#### Silver Layer (Cleaned & Enriched)
-- `silver_weather`: Weather data with date parts, categories, quality flags
-- `silver_solar`: Solar data with efficiency ratios, performance categories
-
-#### Gold Layer (Aggregated)
-- `gold_daily_panel`: Daily performance per panel
-- `gold_hourly_system`: Hourly system-wide metrics
-- `gold_monthly_kpis`: Monthly KPIs for business reporting
-- `gold_anomalies`: Detected anomalies with severity levels
+| Layer | Tables | Description |
+|-------|--------|-------------|
+| **Bronze** | `weather_data`, `solar_panel_readings` | Raw data as received |
+| **Silver** | `silver_weather`, `silver_solar` | Cleaned, enriched with categories and quality flags |
+| **Gold** | `gold_daily_panel`, `gold_hourly_system`, `gold_monthly_kpis`, `gold_anomalies` | Aggregated business metrics |
 
 ---
 
@@ -448,4 +446,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with** ❤️ for solar energy monitoring and data engineering excellence
 
-**Version**: 1.0.0 | **Last Updated**: February 2026
+**Version**: 2.0.0 | **Last Updated**: February 2026
