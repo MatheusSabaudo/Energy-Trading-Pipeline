@@ -1,421 +1,407 @@
-# Energy Trading Pipeline - Solar PV Data Platform
+# ☀️ Solar Energy Data Pipeline
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![Kafka](https://img.shields.io/badge/Apache%20Kafka-4.0.1-red)](https://kafka.apache.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
-[![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-orange)](https://www.microsoft.com/sql-server)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)](https://www.docker.com/)
 [![Airflow](https://img.shields.io/badge/Airflow-2.7.1-green)](https://airflow.apache.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ## 📋 Project Overview
 
-A **complete end-to-end data pipeline** for solar panel monitoring, implementing the **medallion architecture (Bronze, Silver, Gold layers)**. The project simulates IoT solar panel data, streams it through Kafka, stores it in PostgreSQL, and transforms it through multiple refinement layers for business intelligence and analytics.
+A complete end-to-end data pipeline for solar panel monitoring, implementing the **medallion architecture** (Bronze, Silver, Gold layers). The project simulates IoT solar panel data, streams it through Kafka, stores it in PostgreSQL, and transforms it through multiple refinement layers for business intelligence and analytics.
 
 ### 🎯 Key Features
 
-- **Real-time IoT Simulation**: Python producer generating realistic solar panel data
-- **Streaming Pipeline**: Apache Kafka for message brokering
-- **Multi-Database Architecture**: PostgreSQL (operational) + SQL Server (analytical)
-- **Medallion Data Lake**: Bronze (raw), Silver (cleaned), Gold (aggregated) layers
+- **Real-time IoT Simulation**: Python producer generating realistic solar panel data for 10 panels
+- **Weather Data Integration**: WeatherStack API integration for environmental context
+- **Streaming Pipeline**: Apache Kafka for message brokering (port 9093)
+- **Medallion Architecture**: Bronze (raw), Silver (cleaned), Gold (aggregated) layers
 - **Data Quality Framework**: Validation rules, quality flags, anomaly detection
 - **Pipeline Orchestration**: Apache Airflow DAGs for scheduling
 - **Comprehensive Monitoring**: Health checks, data freshness, quality metrics
-- **Docker Containerization**: Easy deployment with Docker Compose
+- **Fully Containerized**: Easy deployment with Docker Compose
+
+---
+
+## 📊 Feasibility Analysis
+
+Comprehensive feasibility analysis for the installation of photovoltaic panels in Turin. The project processes real meteorological data to calculate potential energy production, evaluates different self-consumption strategies (20–70%), and provides a detailed economic analysis including ROI, payback period, and profit over 20–25 years.
+
+---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐    ┌────────┐    ┌─────────────┐    ┌─────────────────┐
-│   PRODUCER  │───▶│ KAFKA  │───▶│  POSTGRES   │───▶│   SQL SERVER    │
-│ solar_data  │    │        │    │ operational │    │   analytical    │
-└─────────────┘    └────────┘    └─────────────┘    └─────────────────┘
-                                                              │
-                                                              ▼
-                                                     ┌─────────────────┐
-                                                     │   MEDALLION     │
-                                                     │   ARCHITECTURE  │
-                                                     └─────────────────┘
-                                                     ├── Bronze (raw)
-                                                     ├── Silver (clean)
-                                                     └── Gold (aggregates)
+┌─────────────────────────────────────────────────────────────────────┐
+│                        DATA SOURCES                                  │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+            ┌─────────────────┴─────────────────┐
+            ▼                                   ▼
+┌───────────────────────┐             ┌───────────────────────┐
+│   WEATHERSTACK API    │             │   IOT SIMULATOR       │
+│   (weatherstack.com)  │             │   (Kafka Producer)    │
+└───────────┬───────────┘             └───────────┬───────────┘
+            │                                     │
+            ▼                                     ▼
+    ┌───────────────┐                     ┌───────────────┐
+    │  Python Fetch │                     │    Kafka      │
+    │   (hourly)    │                     │  (solar-raw)  │
+    └───────┬───────┘                     └───────┬───────┘
+            │                                     │
+            └──────────────┬──────────────────────┘
+                           ▼
+              ┌─────────────────────────┐
+              │     PostgreSQL          │
+              │     (solar_data)        │
+              └─────────────┬───────────┘
+                            │
+            ┌───────────────┴───────────────┐
+            ▼                               ▼
+    ┌───────────────┐               ┌───────────────┐
+    │  weather_data │               │solar_panel_   │
+    │   (Bronze)    │               │  readings     │
+    └───────┬───────┘               └───────┬───────┘
+            │                               │
+            └───────────────┬───────────────┘
+                            ▼
+              ┌─────────────────────────┐
+              │     Silver Layer        │
+              │  (Cleaned & Enriched)   │
+              │ - silver_weather        │
+              │ - silver_solar          │
+              └─────────────┬───────────┘
+                            │
+                            ▼
+              ┌─────────────────────────┐
+              │     Gold Layer          │
+              │   (Aggregated Data)     │
+              │ - gold_daily_panel      │
+              │ - gold_hourly_system    │
+              │ - gold_monthly_kpis     │
+              │ - gold_anomalies        │
+              └─────────────┬───────────┘
+                            │
+            ┌───────────────┴───────────────┐
+            ▼                               ▼
+    ┌───────────────┐               ┌───────────────┐
+    │   Monitoring  │               │   Apache      │
+    │   & Alerts    │               │   Airflow     │
+    └───────────────┘               └───────────────┘
 ```
+
+---
 
 ## 📁 Project Structure
 
 ```
 Energy-Trading-Pipeline/
 │
-├── 📁 config/
-│   └── userdata_config.py           # Central configuration
+├── 📁 config/                          # Configuration files
+│   └── userdata_config.py               # Central configuration
 │
-├── 📁 producers/
-│   └── solar_producer.py             # Kafka producer for solar data
+├── 📁 ingestion/                        # Data ingestion
+│   ├── 📁 api/                          # Weather API
+│   │   └── weatherstack_fetcher.py      # WeatherStack API client
+│   ├── 📁 iot/                          # IoT simulation
+│   │   ├── solar_producer.py            # Kafka producer
+│   │   └── iot_to_postgres.py           # Kafka consumer
+│   └── 📁 scripts/                       # Utility scripts
+│       └── create-topics.sh              # Kafka topic setup
 │
-├── 📁 consumers/
-│   ├── test_consumer.py              # Debug consumer
-│   └── kafka_to_postgres.py          # PostgreSQL consumer
+├── 📁 postgres/                          # Database scripts
+│   ├── 📁 init/                          # Initialization
+│   │   └── init.sql                       # Database schema
+│   ├── 📁 bronze/                         # Bronze layer
+│   │   ├── ddl_bronze.sql
+│   │   └── data_verify.sql
+│   ├── 📁 silver/                         # Silver layer
+│   │   ├── ddl_silver.sql
+│   │   ├── silver_load.sql
+│   │   └── data_verify.sql
+│   └── 📁 gold/                           # Gold layer
+│       ├── ddl_gold.sql
+│       ├── gold_load_daily.sql
+│       ├── gold_load_hourly.sql
+│       ├── gold_load_monthly.sql
+│       ├── gold_load_anomalies.sql
+│       └── data_verify.sql
 │
-├── 📁 bronze/
-│   ├── bronze_ddl.sql                # Bronze table creation
-│   └── postgres_to_sqlserver_bronze.py # Bronze ETL
+├── 📁 orchestration/                      # Airflow orchestration
+│   ├── 📁 dags/                           # DAG definitions
+│   │   ├── 01_ingestion_dag.py
+│   │   ├── 02_silver_transform_dag.py
+│   │   ├── 03_gold_load_dag.py
+│   │   ├── 04_anomaly_detection_dag.py
+│   │   └── 05_pipeline_monitor_dag.py
+│   └── 📁 scripts/                         # Utility scripts
+│       ├── check_kafka.py
+│       ├── check_postgres.py
+│       └── alert.py
 │
-├── 📁 silver/
-│   ├── silver_ddl.sql                # Silver table creation
-│   ├── silver_load.sql                # Silver transformation
-│   └── silver_verify.sql              # Silver verification
+├── 📁 monitoring/                          # Monitoring & alerts
+│   ├── health_checks.sql
+│   └── 📁 alerts/
+│       └── anomaly_alerts.py
 │
-├── 📁 gold/
-│   ├── gold_ddl.sql                   # Gold tables creation
-│   ├── gold_load_daily.sql             # Daily aggregates
-│   ├── gold_load_hourly.sql            # Hourly stats
-│   ├── gold_load_monthly.sql           # Monthly KPIs
-│   ├── gold_load_anomalies.sql         # Anomaly detection
-│   └── monitor_gold.sql                # Pipeline monitoring
+├── 📁 docs/                                # Documentation
+│   ├── architecture.md
+│   ├── data_dictionary.md
+│   └── setup_guide.md
 │
-├── 📁 dags/
-│   ├── solar_producer_dag.py          # Airflow DAGs
-│   ├── solar_consumer_dag.py
-│   └── solar_monitor_dag.py
-│
-├── 🐳 docker-compose.yml                # Docker services
-├── 📜 create-topics.sh                  # Kafka topic setup
-├── 🔍 monitor_enhanced.py                # Pipeline monitor
-├── 📝 requirements.txt                   # Python dependencies
-└── 📚 README.md                          # This file
+├── 🐳 docker-compose.yml                    # Docker services
+├── 📝 requirements.txt                      # Python dependencies
+└── 📚 README.md                              # This file
 ```
 
-## 🚀 Getting Started
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Docker Desktop (Windows/Mac) or Docker Engine (Linux)
-- Python 3.8 or higher
-- SQL Server 2022 (Developer Edition is free)
-- Git
-- At least 8GB RAM allocated to Docker
+- Docker Desktop 20.10+
+- Python 3.8+
+- 8GB RAM minimum
+- WeatherStack API key (free at [weatherstack.com](https://weatherstack.com))
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/Energy-Trading-Pipeline.git
-   cd Energy-Trading-Pipeline
-   ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/Energy-Trading-Pipeline.git
+cd Energy-Trading-Pipeline
 
-2. **Set up Python virtual environment**
-   ```bash
-   # Windows
-   python -m venv .venv
-   .venv\Scripts\activate
+# 2. Set up Python environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-   # Linux/Mac
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
+# 3. Configure API key
+# Edit config/userdata_config.py and add your WeatherStack API key
 
-3. **Install Python dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+# 4. Start Docker services
+docker-compose up -d
+sleep 30  # Wait for services to initialize
 
-4. **Start Docker infrastructure**
-   ```bash
-   docker-compose up -d
-   
-   # Wait 30 seconds for services to initialize
-   # Create Kafka topics
-   chmod +x create-topics.sh
-   ./create-topics.sh
-   ```
+# 5. Create Kafka topics
+chmod +x ingestion/scripts/create-topics.sh
+./ingestion/scripts/create-topics.sh
 
-5. **Create SQL Server database**
-   ```sql
-   -- Connect to SQL Server and run:
-   CREATE DATABASE EnergyTradingPipeline;
-   GO
-   ```
+# 6. Initialize database
+docker cp postgres/init/init.sql postgres:/tmp/
+docker exec -it postgres psql -U airflow -d postgres -c "CREATE DATABASE solar_data;"
+docker exec -it postgres psql -U airflow -d solar_data -f /tmp/init.sql
 
-6. **Create Bronze table**
-   ```bash
-   sqlcmd -S localhost -d EnergyTradingPipeline -i bronze/bronze_ddl.sql
-   ```
+# 7. Start the pipeline
+# Terminal 1: IoT Producer
+python ingestion/iot/solar_producer.py
+
+# Terminal 2: IoT Consumer
+python ingestion/iot/iot_to_postgres.py
+
+# Terminal 3: Weather Fetcher
+python ingestion/api/weatherstack_fetcher.py --city Turin --continuous
+```
+
+---
 
 ## 📊 Data Flow
 
-### 1. **Start the Data Producer**
-```bash
-python producers/solar_producer.py
-```
-This simulates 10 solar panels sending data every 5 seconds.
+### 1. **Ingestion**
+- **Weather Data**: WeatherStack API → Python fetcher → `weather_data` table
+- **IoT Data**: Python producer → Kafka (`solar-raw`) → Consumer → `solar_panel_readings` table
 
-### 2. **Start PostgreSQL Consumer**
-```bash
-python consumers/kafka_to_postgres.py
-```
-This consumes messages from Kafka and stores them in PostgreSQL.
+### 2. **Medallion Transformations**
 
-### 3. **Load Bronze Layer**
-```bash
-python bronze/postgres_to_sqlserver_bronze.py
-```
-Extracts data from PostgreSQL and loads raw data into SQL Server Bronze.
+| Layer | Tables | Description |
+|-------|--------|-------------|
+| **Bronze** | `weather_data`, `solar_panel_readings` | Raw data as received |
+| **Silver** | `silver_weather`, `silver_solar` | Cleaned, enriched with categories and quality flags |
+| **Gold** | `gold_daily_panel`, `gold_hourly_system`, `gold_monthly_kpis`, `gold_anomalies` | Aggregated business metrics |
 
-### 4. **Transform to Silver**
-```bash
-sqlcmd -S localhost -d EnergyTradingPipeline -i silver/silver_load.sql
-```
-Cleans, validates, and enriches data with business categories.
-
-### 5. **Build Gold Aggregations**
-```bash
-# Run in order
-sqlcmd -S localhost -d EnergyTradingPipeline -i gold/gold_load_daily.sql
-sqlcmd -S localhost -d EnergyTradingPipeline -i gold/gold_load_hourly.sql
-sqlcmd -S localhost -d EnergyTradingPipeline -i gold/gold_load_monthly.sql
-sqlcmd -S localhost -d EnergyTradingPipeline -i gold/gold_load_anomalies.sql
-```
+---
 
 ## 🔧 Configuration
 
-### Panel Parameters (`config/userdata_config.py`)
+### API Configuration (`config/userdata_config.py`)
+
 ```python
-PANEL_PARAMS = {
-    'panel_power_kw': 3.0,           # 3 kWp typical for Italian home
-    'panel_efficiency': 0.19,         # 19% efficiency
-    'system_losses': 0.14,            # 14% losses
-    'temp_loss_coeff': 0.004,         # 0.4% loss per °C above 25°C
-    'panel_type': 'Monocrystalline'   # Panel technology
+API_CONFIG = {
+    'weatherstack': {
+        'base_url': 'http://api.weatherstack.com',
+        'access_key': 'your-api-key-here',  # Required
+    }
 }
-```
 
-### Database Connections
-
-**PostgreSQL (Source)**
-```python
-PG_CONFIG = {
+POSTGRES_CONFIG = {
     'host': 'localhost',
     'port': 5432,
     'database': 'solar_data',
     'user': 'airflow',
     'password': 'airflow'
 }
-```
 
-**SQL Server (Destination)**
-```python
-SQLSERVER_CONFIG = {
-    'driver': '{ODBC Driver 17 for SQL Server}',
-    'server': 'localhost',
-    'database': 'EnergyTradingPipeline',
-    'trusted_connection': 'yes'  # Windows Authentication
-    # OR for SQL Authentication:
-    # 'uid': 'sa',
-    # 'pwd': 'YourPassword'
+PANEL_PARAMS = {
+    'panel_power_kw': 3.0,
+    'panel_efficiency': 0.19,
+    'system_losses': 0.14,
+    'temp_loss_coeff': 0.004,
+    'panel_type': 'Monocrystalline'
 }
 ```
 
-## 📈 Monitoring & Health Checks
+---
 
-### Pipeline Monitor
+## 🎯 Airflow Orchestration
+
+### DAG Dependencies
+
+```mermaid
+graph TD
+    A[01_ingestion_pipeline] --> B[02_silver_transform]
+    B --> C[03_gold_load]
+    C --> D[04_anomaly_detection]
+    D --> E[05_pipeline_monitor]
+    
+    style A fill:#90EE90,color:#000000
+    style B fill:#87CEEB,color:#000000
+    style C fill:#FFB6C1,color:#000000
+    style D fill:#FFA07A,color:#000000
+    style E fill:#DDA0DD,color:#000000
+```
+
+| DAG | Schedule | Description |
+|-----|----------|-------------|
+| `01_ingestion_pipeline` | Every 15 min | Fetch weather and ensure Kafka ingestion |
+| `02_silver_transform` | Hourly | Transform Bronze → Silver |
+| `03_gold_load` | Daily | Load Gold aggregations |
+| `04_anomaly_detection` | Hourly | Detect and alert on anomalies |
+| `05_pipeline_monitor` | Hourly | Overall pipeline health monitoring |
+
+---
+
+## 📊 Monitoring
+
+### Health Checks
+
 ```bash
-python monitor_enhanced.py
+# Run comprehensive health checks
+cd monitoring
+./run_health_checks.sh
+
+# Check anomaly alerts
+python3 alerts/anomaly_alerts.py
+
+# Force test alert
+python3 alerts/anomaly_alerts.py --force
 ```
-This script checks:
-- ✅ All Docker containers status
-- ✅ Kafka topics and message counts
-- ✅ PostgreSQL connection and record counts
-- ✅ Producer and consumer processes
 
-### Gold Layer Monitor
-```bash
-sqlcmd -S localhost -d EnergyTradingPipeline -i gold/monitor_gold.sql -o monitor_output.txt
-```
-Provides comprehensive health score (0-100) with checks for:
-- Data freshness (last update time)
-- Active anomalies needing attention
-- Data quality trends (last 7 days)
-- Panel health and issues
-- Production vs expected performance
-- Pipeline volume metrics
-- Hourly production patterns
+### Health Score Calculation
 
-## 🔄 ETL Processes
+The pipeline monitor calculates a health score (0-100) based on:
+- **Data Freshness** (30 points)
+- **Active Anomalies** (40 points)
+- **Data Quality** (30 points)
 
-### Bronze Load (PostgreSQL → SQL Server)
-- **File**: `bronze/postgres_to_sqlserver_bronze.py`
-- **Schedule**: Every 15 minutes
-- **Logic**: Incremental load using timestamps
-- **Preserves**: Raw data exactly as received
-- **Adds**: ingestion_time, source_file metadata
+---
 
-### Silver Transformation
-- **File**: `silver/silver_load.sql`
-- **Enrichments**:
-  - Date dimensions (production_date, production_hour)
-  - Cloud conditions (Clear, Partly Cloudy, Cloudy)
-  - Efficiency ratio (production / panel_power)
-  - Quality flags and issue tracking
+## 🔌 Service Ports
 
-### Gold Aggregations
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Airflow | http://localhost:8080 | admin / admin |
+| Kafka-UI | http://localhost:8081 | - |
+| pgAdmin | http://localhost:5050 | admin@msr.com / admin |
+| Metabase | http://localhost:3000 | Create account |
+| PostgreSQL | `localhost:5432` | airflow / airflow |
 
-| Script | Aggregation Level | Business Value |
-|--------|-------------------|----------------|
-| `gold_load_daily.sql` | Per-panel daily | Track individual panel health |
-| `gold_load_hourly.sql` | System hourly | Monitor real-time performance |
-| `gold_load_monthly.sql` | Monthly KPIs | Executive dashboards |
-| `gold_load_anomalies.sql` | Issue detection | Operations alerts |
+---
 
-## 🐳 Docker Services
+## 📈 Sample Queries
 
-| Service | Port | URL | Credentials |
-|---------|------|-----|-------------|
-| Kafka | 9092 | - | - |
-| Kafka-UI | 8081 | http://localhost:8081 | - |
-| PostgreSQL | 5432 | - | airflow/airflow |
-| pgAdmin | 5050 | http://localhost:5050 | admin@msr.com/admin |
-| Airflow | 8080 | http://localhost:8080 | admin/admin |
-| Metabase | 3000 | http://localhost:3000 | Create account |
-
-## 📊 Sample Queries
-
-### Daily Production Summary
+### Bronze Layer
 ```sql
-SELECT 
-    report_date,
-    COUNT(DISTINCT panel_id) as active_panels,
-    SUM(total_production_kwh) as total_production,
-    AVG(data_quality_pct) as avg_quality
-FROM gold.daily_panel_performance
-WHERE report_date >= DATEADD(day, -7, GETDATE())
-GROUP BY report_date
-ORDER BY report_date DESC;
+-- Latest weather data
+SELECT * FROM weather_data ORDER BY timestamp DESC LIMIT 5;
+
+-- Latest solar readings
+SELECT * FROM solar_panel_readings ORDER BY timestamp DESC LIMIT 5;
 ```
 
-### Active Anomalies
+### Silver Layer
 ```sql
-SELECT 
-    severity,
-    anomaly_type,
-    COUNT(*) as count,
-    MIN(anomaly_date) as oldest
-FROM gold.anomaly_log
+-- Valid solar readings with performance categories
+SELECT timestamp, panel_id, production_kw, performance_category
+FROM silver_solar
+WHERE is_valid = true
+ORDER BY timestamp DESC
+LIMIT 10;
+```
+
+### Gold Layer
+```sql
+-- Daily panel performance
+SELECT date, panel_id, total_production_kwh, avg_efficiency
+FROM gold_daily_panel
+WHERE date = CURRENT_DATE
+ORDER BY total_production_kwh DESC;
+
+-- Active anomalies
+SELECT anomaly_type, severity, COUNT(*)
+FROM gold_anomalies
 WHERE resolution_status = 'Open'
-GROUP BY severity, anomaly_type
-ORDER BY 
-    CASE severity 
-        WHEN 'Critical' THEN 1 
-        WHEN 'Warning' THEN 2 
-        ELSE 3 
-    END;
+GROUP BY anomaly_type, severity;
 ```
 
-### Panel Performance Ranking
-```sql
-SELECT TOP 5
-    panel_id,
-    AVG(efficiency_ratio) as avg_efficiency,
-    SUM(production_kw) as total_production,
-    COUNT(*) as readings
-FROM silver.solar_data
-WHERE timestamp >= DATEADD(day, -7, GETDATE())
-GROUP BY panel_id
-ORDER BY avg_efficiency DESC;
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Kafka connection refused | `docker-compose restart kafka` |
+| PostgreSQL connection failed | `docker-compose restart postgres` |
+| Airflow DAGs not showing | Check `docker exec -it airflow ls -la /opt/airflow/dags/` |
+| Weather API rate limited | Wait or upgrade at weatherstack.com |
+| No data in gold tables | Run silver transform first: `02_silver_transform` |
+
+### Reset Everything
+
+```bash
+# Stop and remove all containers
+docker-compose down -v
+
+# Start fresh
+docker-compose up -d
 ```
 
-## 🎯 Key Business Questions Answered
+---
 
-| Question | Table | Use Case |
-|----------|-------|----------|
-| "What was total production yesterday?" | `gold.daily_panel_performance` | Daily reporting |
-| "Which panels underperformed this week?" | `gold.daily_panel_performance` | Maintenance planning |
-| "What's our peak production hour?" | `gold.hourly_system_stats` | Grid integration |
-| "How much CO2 did we save this month?" | `gold.monthly_kpis` | Sustainability reporting |
-| "Are there any active alerts?" | `gold.anomaly_log` | Operations dashboard |
-| "What's our data quality trend?" | `gold.daily_panel_performance` | Pipeline health |
-| "Which panels need maintenance?" | `gold.anomaly_log` | Preventive maintenance |
+## 📚 Documentation
+
+- [Architecture Overview](docs/architecture.md)
+- [Data Dictionary](docs/data_dictionary.md)
+- [Setup Guide](docs/setup_guide.md)
+
+---
 
 ## 🛠️ Technologies Used
 
 | Category | Technologies |
 |----------|--------------|
-| **Languages** | Python 3.8+, T-SQL |
+| **Languages** | Python 3.8+, SQL |
 | **Streaming** | Apache Kafka 4.0.1, Kafka-UI |
-| **Databases** | PostgreSQL 15, SQL Server 2022 |
+| **Database** | PostgreSQL 15 |
 | **Orchestration** | Apache Airflow 2.7.1 |
 | **Containerization** | Docker, Docker Compose |
-| **Libraries** | confluent-kafka, psycopg2, pyodbc, pandas |
-| **Monitoring** | Custom Python scripts, SQL monitors |
-| **Visualization** | Metabase, pgAdmin, Kafka-UI |
+| **Monitoring** | Custom Python scripts, SQL |
+| **Visualization** | Metabase, pgAdmin |
 
-## 📝 Requirements.txt
-
-```txt
-confluent-kafka>=2.3.0
-psycopg2-binary>=2.9.9
-pyodbc>=5.0.1
-pandas>=2.0.0
-python-dotenv>=1.0.0
-apache-airflow>=2.7.0
-apache-airflow-providers-postgres>=5.0.0
-apache-airflow-providers-microsoft-mssql>=3.0.0
-methodtools>=0.4.7
-pyarrow>=14.0.0
-```
-
-## 🚨 Troubleshooting
-
-### Common Issues and Solutions
-
-1. **Kafka connection refused**
-   ```bash
-   # Check if Kafka is running
-   docker-compose ps kafka
-   # Restart if needed
-   docker-compose restart kafka
-   ```
-
-2. **SQL Server connection fails**
-   ```bash
-   # Test connection
-   sqlcmd -S localhost -d master -Q "SELECT @@VERSION"
-   # Enable TCP/IP in SQL Server Configuration Manager
-   ```
-
-3. **Producer not sending data**
-   ```bash
-   # Check Kafka topics
-   docker exec kafka /opt/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092
-   # Recreate topics if needed
-   ./create-topics.sh
-   ```
-
-4. **Airflow DAG import errors**
-   ```bash
-   # Install missing providers
-   pip install apache-airflow-providers-microsoft-mssql
-   # Restart airflow
-   docker-compose restart airflow
-   ```
-
-## 📈 Performance Metrics
-
-| Metric | Expected Value |
-|--------|----------------|
-| Messages per second | ~2-5 |
-| Daily records | ~172,000 |
-| Bronze load time (1000 records) | < 5 seconds |
-| Silver transformation (1000 records) | < 3 seconds |
-| Gold aggregation (daily) | < 10 seconds |
-| End-to-end latency | < 1 minute |
-
-## 🔐 Security Best Practices
-
-- Never commit passwords to Git (use environment variables)
-- Use Windows Authentication for SQL Server when possible
-- Limit network exposure of Kafka ports
-- Regular backups of PostgreSQL and SQL Server
-- Monitor failed login attempts
+---
 
 ## 🤝 Contributing
 
@@ -425,33 +411,39 @@ pyarrow>=14.0.0
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
 
 ## 👥 Authors
 
 - **Matheus Sabaudo Rodrigues** - *Data Engineer* - [YourGitHub](https://github.com/MatheusSabaudo)
 
+---
+
 ## 🙏 Acknowledgments
 
-- Apache Kafka documentation
-- Microsoft SQL Server docs
-- PostgreSQL community
-- Docker community
-- Apache Airflow community
+- WeatherStack API for weather data
+- Apache Kafka and Airflow communities
+- PostgreSQL team
 
-## 📞 Contact
+---
 
-For questions or support, please open an issue on GitHub or contact the maintainers.
+## 📊 Project Status
+
+✅ **Complete** - Production-ready pipeline with:
+- Data ingestion from multiple sources
+- Medallion architecture implementation
+- Airflow orchestration
+- Comprehensive monitoring
+- Full documentation
 
 ---
 
 **Built with** ❤️ for solar energy monitoring and data engineering excellence
 
-**Version**: 1.0.0
-**Last Updated**: February 2026
-
----
-
-⭐ If you found this project useful, please give it a star on GitHub!
+**Version**: 2.0.0 | **Last Updated**: February 2026
