@@ -1,6 +1,5 @@
 ## 📄 **`docs/setup_guide.md`**
 
-```markdown
 # Solar Pipeline Setup Guide
 
 ## 📋 Table of Contents
@@ -637,4 +636,3 @@ For issues or questions:
 **Version**: 1.0.0  
 **Last Updated**: February 2026  
 **Author**: Matheus Sabaudo Rodrigues
-```
