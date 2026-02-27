@@ -1,93 +1,72 @@
-USE EnergyTradingPipeline;
-GO
+-- postgres/gold/gold_load_anomalies.sql
+-- Gold Layer - Anomaly Detection
+
+\c solar_data;
 
 -- ============================================================
--- GOLD LAYER LOAD - Anomaly Detection (FIXED)
+-- Detect Anomalies: Panels with unusually low production
 -- ============================================================
+TRUNCATE gold_anomalies;  -- Optional: clear old anomalies
 
-PRINT 'STARTING GOLD ANOMALY DETECTION LOAD';
-GO
-
-DECLARE @AnomalyCount INT;
-
-INSERT INTO gold.anomaly_log (
-    anomaly_date,
-    panel_id,
-    anomaly_type,
-    severity,
-    expected_value,
-    actual_value,
-    deviation_percentage,
-    weather_conditions,
-    resolution_status
-)
-SELECT 
-    CAST(s.timestamp AS DATE) as anomaly_date,
-    s.panel_id,
-    
-    -- Anomaly type
-    CASE 
-        WHEN s.production_kw < (p.avg_production * 0.3) THEN 'Critical Low Production'
-        WHEN s.production_kw < (p.avg_production * 0.5) THEN 'Low Production'
-        WHEN s.temperature_c > 45 THEN 'High Temperature'
-        WHEN s.is_valid = 0 AND s.quality_issues LIKE '%Negative%' THEN 'Negative Production'
-        ELSE NULL
-    END as anomaly_type,
-    
-    -- Severity
-    CASE 
-        WHEN s.production_kw < (p.avg_production * 0.3) THEN 'Critical'
-        WHEN s.production_kw < (p.avg_production * 0.5) THEN 'Warning'
-        WHEN s.temperature_c > 45 THEN 'Warning'
-        WHEN s.is_valid = 0 AND s.quality_issues LIKE '%Negative%' THEN 'Critical'
-        ELSE NULL
-    END as severity,
-    
-    -- Values
-    p.avg_production as expected_value,
-    s.production_kw as actual_value,
-    CASE 
-        WHEN p.avg_production > 0 
-        THEN CAST(100.0 * (p.avg_production - s.production_kw) / p.avg_production AS DECIMAL(5,2))
-        ELSE NULL
-    END as deviation_percentage,
-    
-    -- Context
-    s.cloud_condition as weather_conditions,
-    'Open' as resolution_status
-    
-FROM silver.solar_data s
-JOIN (
+WITH panel_stats AS (
     SELECT 
         panel_id,
-        AVG(production_kw) as avg_production
-    FROM silver.solar_data
-    WHERE is_valid = 1
+        AVG(production_kw) as avg_production,
+        STDDEV(production_kw) as stddev_production
+    FROM silver_solar
+    WHERE is_valid = true
+    AND timestamp > NOW() - INTERVAL '7 days'
     GROUP BY panel_id
-) p ON s.panel_id = p.panel_id
-WHERE 
-    -- Anomaly conditions
-    (
-        (s.production_kw < (p.avg_production * 0.5) AND s.is_valid = 1)
-        OR (s.temperature_c > 45)
-        OR (s.is_valid = 0 AND s.quality_issues LIKE '%Negative%')
-    )
-    -- Not already logged (prevent duplicates)
-    AND NOT EXISTS (
-        SELECT 1 FROM gold.anomaly_log g 
-        WHERE g.panel_id = s.panel_id 
-          AND CAST(g.anomaly_date AS DATE) = CAST(s.timestamp AS DATE)
-          AND g.anomaly_type = 
-            CASE 
-                WHEN s.production_kw < (p.avg_production * 0.3) THEN 'Critical Low Production'
-                WHEN s.production_kw < (p.avg_production * 0.5) THEN 'Low Production'
-                WHEN s.temperature_c > 45 THEN 'High Temperature'
-                WHEN s.is_valid = 0 AND s.quality_issues LIKE '%Negative%' THEN 'Negative Production'
-                ELSE NULL
-            END
-    );
+),
+today_readings AS (
+    SELECT 
+        s.panel_id,
+        s.production_kw,
+        p.avg_production,
+        (s.production_kw - p.avg_production) / NULLIF(p.stddev_production, 0) as z_score
+    FROM silver_solar s
+    JOIN panel_stats p ON s.panel_id = p.panel_id
+    WHERE DATE(s.timestamp) = CURRENT_DATE
+)
+INSERT INTO gold_anomalies (anomaly_date, panel_id, anomaly_type, severity, expected_value, actual_value, deviation_percentage)
+SELECT 
+    CURRENT_DATE,
+    panel_id,
+    CASE WHEN z_score < -3 THEN 'Critical Low Production' ELSE 'Low Production' END,
+    CASE WHEN z_score < -3 THEN 'Critical' ELSE 'Warning' END,
+    avg_production,
+    production_kw,
+    ROUND(100.0 * (avg_production - production_kw) / avg_production, 2)
+FROM today_readings
+WHERE z_score < -2;
 
-SET @AnomalyCount = @@ROWCOUNT;
+-- ============================================================
+-- Detect Missing Data Anomalies
+-- ============================================================
+WITH expected_panels AS (
+    SELECT DISTINCT panel_id FROM silver_solar
+)
+INSERT INTO gold_anomalies (anomaly_date, panel_id, anomaly_type, severity)
+SELECT 
+    CURRENT_DATE,
+    e.panel_id,
+    'Missing Data',
+    'Critical'
+FROM expected_panels e
+WHERE NOT EXISTS (
+    SELECT 1 FROM silver_solar s 
+    WHERE s.panel_id = e.panel_id 
+    AND DATE(s.timestamp) = CURRENT_DATE
+);
 
-PRINT 'Completed: ' + CAST(@AnomalyCount AS VARCHAR) + ' anomaly records loaded';
-GO
+-- ============================================================
+-- Show results
+-- ============================================================
+SELECT 
+    anomaly_type,
+    severity,
+    COUNT(*) as count
+FROM gold_anomalies
+WHERE anomaly_date = CURRENT_DATE
+GROUP BY anomaly_type, severity
+ORDER BY severity, count DESC;

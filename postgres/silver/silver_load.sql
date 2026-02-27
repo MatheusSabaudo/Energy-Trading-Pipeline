@@ -1,79 +1,97 @@
-USE EnergyTradingPipeline;
-GO
+-- postgres/silver/silver_load.sql
+-- Silver Layer - Data Population
+
+\c solar_data;
 
 -- ============================================================
--- SILVER LAYER LOAD - Bronze to Silver
+-- Load silver_weather
 -- ============================================================
+TRUNCATE silver_weather;
 
-PRINT 'STARTING BRONZE TO SILVER TRANSFORMATION';
-GO
-
-INSERT INTO silver.solar_data (
-    event_id,
-    bronze_id,
-    timestamp,
-    panel_id,
-    panel_type,
-    panel_power_kw,
-    production_kw,
-    temperature_c,
-    -- REMOVED: cloud_factor and temp_efficiency (not in silver table)
-    production_date,
-    production_hour,
-    cloud_condition,
-    efficiency_ratio,
-    is_valid,
-    quality_issues
+INSERT INTO silver_weather (
+    id, city, timestamp, temperature, humidity, wind_speed,
+    wind_direction, pressure, precipitation, cloud_cover, uv_index,
+    weather_code, weather_description, is_day, observation_time,
+    ingestion_timestamp, year, month, day, hour, day_of_week,
+    temperature_category, sky_condition, uv_category, is_valid
 )
 SELECT 
-    b.event_id,
-    NULL as bronze_id,
-    b.timestamp,
-    b.panel_id,
-    b.panel_type,
-    b.panel_power_kw,
-    b.production_kw,
-    b.temperature_c,
-    -- REMOVED: b.cloud_factor and b.temp_efficiency
-    
-    CAST(b.timestamp AS DATE) as production_date,
-    DATEPART(HOUR, b.timestamp) as production_hour,
-    
+    id, city, timestamp, temperature, humidity, wind_speed,
+    wind_direction, pressure, precipitation, cloud_cover, uv_index,
+    weather_code, weather_description, is_day, observation_time,
+    ingestion_timestamp,
+    EXTRACT(YEAR FROM timestamp) AS year,
+    EXTRACT(MONTH FROM timestamp) AS month,
+    EXTRACT(DAY FROM timestamp) AS day,
+    EXTRACT(HOUR FROM timestamp) AS hour,
+    EXTRACT(DOW FROM timestamp) AS day_of_week,
     CASE 
-        WHEN b.cloud_factor >= 0.8 THEN 'Clear'
-        WHEN b.cloud_factor >= 0.5 THEN 'Partly Cloudy'
-        WHEN b.cloud_factor IS NULL THEN 'Unknown'
+        WHEN temperature < 0 THEN 'Freezing'
+        WHEN temperature < 10 THEN 'Cold'
+        WHEN temperature < 20 THEN 'Mild'
+        WHEN temperature < 30 THEN 'Warm'
+        ELSE 'Hot'
+    END AS temperature_category,
+    CASE 
+        WHEN cloud_cover < 20 THEN 'Clear'
+        WHEN cloud_cover < 60 THEN 'Partly Cloudy'
         ELSE 'Cloudy'
-    END as cloud_condition,
-    
+    END AS sky_condition,
     CASE 
-        WHEN b.panel_power_kw > 0 THEN b.production_kw / b.panel_power_kw
-        ELSE NULL
-    END as efficiency_ratio,
-    
+        WHEN uv_index < 3 THEN 'Low'
+        WHEN uv_index < 6 THEN 'Moderate'
+        WHEN uv_index < 8 THEN 'High'
+        ELSE 'Very High'
+    END AS uv_category,
     CASE 
-        WHEN b.production_kw < 0 THEN 0
-        WHEN b.temperature_c < -30 OR b.temperature_c > 60 THEN 0
-        WHEN b.cloud_factor < 0 OR b.cloud_factor > 1 THEN 0
-        WHEN b.panel_power_kw > 0 AND (b.production_kw / b.panel_power_kw) > 1.2 THEN 0
-        WHEN b.panel_id IS NULL THEN 0
-        ELSE 1
-    END as is_valid,
-    
-    CASE 
-        WHEN b.production_kw < 0 THEN 'Negative production'
-        WHEN b.temperature_c < -30 OR b.temperature_c > 60 THEN 'Temperature out of range'
-        WHEN b.cloud_factor < 0 OR b.cloud_factor > 1 THEN 'Cloud factor invalid'
-        WHEN b.panel_power_kw > 0 AND (b.production_kw / b.panel_power_kw) > 1.2 THEN 'Efficiency too high'
-        WHEN b.panel_id IS NULL THEN 'Missing panel_id'
-        ELSE NULL
-    END as quality_issues
-    
-FROM bronze.api_data b
-LEFT JOIN silver.solar_data s ON b.event_id = s.event_id
-WHERE s.event_id IS NULL;
+        WHEN temperature BETWEEN -30 AND 50 
+             AND humidity BETWEEN 0 AND 100
+             AND wind_speed >= 0
+             AND cloud_cover BETWEEN 0 AND 100
+        THEN TRUE
+        ELSE FALSE
+    END AS is_valid
+FROM weather_data;
 
-PRINT 'Completed: ' + CAST(@@ROWCOUNT AS VARCHAR) + ' rows loaded to silver.solar_data';
-GO
+SELECT 'silver_weather loaded: ' || COUNT(*) || ' rows' FROM silver_weather;
 
-SELECT * FROM silver.solar_data;
+-- ============================================================
+-- Load silver_solar
+-- ============================================================
+TRUNCATE silver_solar;
+
+INSERT INTO silver_solar (
+    id, event_id, timestamp, panel_id, panel_type,
+    panel_power_kw, production_kw, temperature_c,
+    cloud_factor, temp_efficiency, status, city,
+    ingestion_timestamp, year, month, day, hour, day_of_week,
+    efficiency_ratio, performance_category, is_valid
+)
+SELECT 
+    id, event_id, timestamp, panel_id, panel_type,
+    panel_power_kw, production_kw, temperature_c,
+    cloud_factor, temp_efficiency, status, city,
+    ingestion_timestamp,
+    EXTRACT(YEAR FROM timestamp) AS year,
+    EXTRACT(MONTH FROM timestamp) AS month,
+    EXTRACT(DAY FROM timestamp) AS day,
+    EXTRACT(HOUR FROM timestamp) AS hour,
+    EXTRACT(DOW FROM timestamp) AS day_of_week,
+    production_kw / NULLIF(panel_power_kw, 0) AS efficiency_ratio,
+    CASE 
+        WHEN production_kw / NULLIF(panel_power_kw, 0) > 0.8 THEN 'Excellent'
+        WHEN production_kw / NULLIF(panel_power_kw, 0) > 0.5 THEN 'Good'
+        WHEN production_kw / NULLIF(panel_power_kw, 0) > 0.2 THEN 'Fair'
+        ELSE 'Poor'
+    END AS performance_category,
+    CASE 
+        WHEN production_kw >= 0 
+             AND temperature_c BETWEEN -30 AND 60
+             AND cloud_factor BETWEEN 0 AND 1
+             AND temp_efficiency BETWEEN 0.5 AND 1.5
+        THEN TRUE
+        ELSE FALSE
+    END AS is_valid
+FROM solar_panel_readings;
+
+SELECT 'silver_solar loaded: ' || COUNT(*) || ' rows' FROM silver_solar;

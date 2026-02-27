@@ -10,7 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 5s
@@ -65,8 +65,17 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      # Python path for imports
+      PYTHONPATH: "/opt/airflow:/opt/airflow/orchestration:/opt/airflow/ingestion:/opt/airflow/config"
+      # No MSSQL needed - just PostgreSQL and Kafka
+      _PIP_ADDITIONAL_REQUIREMENTS: "psycopg2-binary confluent-kafka apache-airflow-providers-postgres"
     volumes:
-      - ./dags:/opt/airflow/dags
+      - ./orchestration/dags:/opt/airflow/dags
+      - ./orchestration:/opt/airflow/orchestration
+      - ./ingestion:/opt/airflow/ingestion
+      - ./config:/opt/airflow/config
+      - ./postgres:/opt/airflow/postgres
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8080:8080"
     command: >

@@ -1,319 +1,194 @@
-USE EnergyTradingPipeline;
-GO
+-- postgres/silver/data_verify.sql
+-- Silver Layer - Data Verification
+
+\c solar_data;
 
 -- ============================================================
--- SILVER LAYER DATA VERIFIER
+-- SILVER LAYER VERIFICATION
 -- ============================================================
 
-PRINT '============================================================';
-PRINT 'SILVER LAYER DATA VERIFICATION';
-PRINT '============================================================';
-GO
+SELECT '==================================================' as line;
+SELECT 'SILVER LAYER DATA VERIFICATION' as title;
+SELECT '==================================================' as line;
 
 -- ============================================================
--- 1. BASIC ROW COUNTS
+-- 1. ROW COUNTS COMPARISON (Bronze vs Silver)
 -- ============================================================
-PRINT '';
-PRINT '1. BASIC ROW COUNTS';
-PRINT '------------------------------------------------------------';
-
-DECLARE @total_rows INT;
-DECLARE @distinct_events INT;
-DECLARE @distinct_panels INT;
-DECLARE @date_range_start DATETIME2;
-DECLARE @date_range_end DATETIME2;
+SELECT '1. BRONZE VS SILVER ROW COUNTS' as section;
 
 SELECT 
-    @total_rows = COUNT(*),
-    @distinct_events = COUNT(DISTINCT event_id),
-    @distinct_panels = COUNT(DISTINCT panel_id),
-    @date_range_start = MIN(timestamp),
-    @date_range_end = MAX(timestamp)
-FROM silver.solar_data;
-
-PRINT 'Total rows: ' + ISNULL(CAST(@total_rows AS VARCHAR), '0');
-PRINT 'Unique events: ' + ISNULL(CAST(@distinct_events AS VARCHAR), '0');
-PRINT 'Unique panels: ' + ISNULL(CAST(@distinct_panels AS VARCHAR), '0');
-PRINT 'Date range: ' + ISNULL(CAST(@date_range_start AS VARCHAR), 'N/A') + ' to ' + ISNULL(CAST(@date_range_end AS VARCHAR), 'N/A');
+    'weather_data' as source,
+    (SELECT COUNT(*) FROM weather_data) as bronze_count,
+    (SELECT COUNT(*) FROM silver_weather) as silver_count,
+    CASE 
+        WHEN (SELECT COUNT(*) FROM weather_data) = (SELECT COUNT(*) FROM silver_weather) 
+        THEN '✅ MATCH'
+        ELSE '❌ MISMATCH'
+    END as status
+UNION ALL
+SELECT 
+    'solar_panel_readings',
+    (SELECT COUNT(*) FROM solar_panel_readings),
+    (SELECT COUNT(*) FROM silver_solar),
+    CASE 
+        WHEN (SELECT COUNT(*) FROM solar_panel_readings) = (SELECT COUNT(*) FROM silver_solar) 
+        THEN '✅ MATCH'
+        ELSE '❌ MISMATCH'
+    END;
 
 -- ============================================================
--- 2. DATA QUALITY CHECKS (continued in same batch)
+-- 2. SILVER WEATHER QUALITY
 -- ============================================================
-PRINT '';
-PRINT '2. DATA QUALITY CHECKS';
-PRINT '------------------------------------------------------------';
-
-DECLARE @valid_rows INT;
-DECLARE @invalid_rows INT;
-DECLARE @valid_pct DECIMAL(5,2);
+SELECT '2. SILVER WEATHER QUALITY' as section;
 
 SELECT 
-    @valid_rows = SUM(CASE WHEN is_valid = 1 THEN 1 ELSE 0 END),
-    @invalid_rows = SUM(CASE WHEN is_valid = 0 THEN 1 ELSE 0 END)
-FROM silver.solar_data;
-
-IF @total_rows > 0
-    SET @valid_pct = (100.0 * @valid_rows / @total_rows);
-ELSE
-    SET @valid_pct = 0;
-
-PRINT 'Valid rows: ' + ISNULL(CAST(@valid_rows AS VARCHAR), '0') + ' (' + ISNULL(CAST(ROUND(@valid_pct, 1) AS VARCHAR), '0') + '%)';
-PRINT 'Invalid rows: ' + ISNULL(CAST(@invalid_rows AS VARCHAR), '0') + ' (' + ISNULL(CAST(ROUND(100.0 - @valid_pct, 1) AS VARCHAR), '0') + '%)';
-
-IF @invalid_rows > 0
-BEGIN
-    PRINT '';
-    PRINT 'Top quality issues:';
-    SELECT TOP 5
-        ISNULL(quality_issues, 'Unknown') as issue_type,
-        COUNT(*) as occurrence,
-        CAST(100.0 * COUNT(*) / @invalid_rows AS DECIMAL(5,1)) as percentage
-    FROM silver.solar_data
-    WHERE quality_issues IS NOT NULL AND quality_issues != ''
-    GROUP BY quality_issues
-    ORDER BY occurrence DESC;
-END
-ELSE
-BEGIN
-    PRINT 'No quality issues found';
-END
+    COUNT(*) as total_records,
+    COUNT(CASE WHEN is_valid THEN 1 END) as valid_records,
+    COUNT(CASE WHEN NOT is_valid THEN 1 END) as invalid_records,
+    ROUND(100.0 * COUNT(CASE WHEN is_valid THEN 1 END) / COUNT(*), 2) as quality_pct,
+    COUNT(DISTINCT temperature_category) as temp_categories,
+    COUNT(DISTINCT sky_condition) as sky_categories,
+    COUNT(DISTINCT uv_category) as uv_categories
+FROM silver_weather;
 
 -- ============================================================
--- 3. COLUMN COMPLETENESS
+-- 3. SILVER SOLAR QUALITY
 -- ============================================================
-PRINT '';
-PRINT '3. COLUMN COMPLETENESS (Non-Null %)';
-PRINT '------------------------------------------------------------';
-
-IF @total_rows > 0
-BEGIN
-    SELECT 
-        'event_id' as column_name,
-        CAST(100.0 * COUNT(*) / @total_rows AS DECIMAL(5,1)) as completeness_pct
-    FROM silver.solar_data WHERE event_id IS NOT NULL
-    UNION ALL
-    SELECT 
-        'timestamp',
-        CAST(100.0 * COUNT(*) / @total_rows AS DECIMAL(5,1))
-    FROM silver.solar_data WHERE timestamp IS NOT NULL
-    UNION ALL
-    SELECT 
-        'panel_id',
-        CAST(100.0 * COUNT(*) / @total_rows AS DECIMAL(5,1))
-    FROM silver.solar_data WHERE panel_id IS NOT NULL
-    UNION ALL
-    SELECT 
-        'panel_power_kw',
-        CAST(100.0 * COUNT(*) / @total_rows AS DECIMAL(5,1))
-    FROM silver.solar_data WHERE panel_power_kw IS NOT NULL
-    UNION ALL
-    SELECT 
-        'production_kw',
-        CAST(100.0 * COUNT(*) / @total_rows AS DECIMAL(5,1))
-    FROM silver.solar_data WHERE production_kw IS NOT NULL
-    UNION ALL
-    SELECT 
-        'temperature_c',
-        CAST(100.0 * COUNT(*) / @total_rows AS DECIMAL(5,1))
-    FROM silver.solar_data WHERE temperature_c IS NOT NULL
-    ORDER BY completeness_pct DESC;
-END
-ELSE
-    PRINT 'No data to analyze';
-GO  -- Need GO here to start a new batch for the next sections
-
--- ============================================================
--- 4. DATA DISTRIBUTION CHECKS
--- ============================================================
-PRINT '';
-PRINT '4. DATA DISTRIBUTION';
-PRINT '------------------------------------------------------------';
-
--- Production statistics
-SELECT 
-    'Production (kW)' as metric,
-    MIN(production_kw) as min_value,
-    MAX(production_kw) as max_value,
-    AVG(production_kw) as avg_value,
-    STDEV(production_kw) as std_dev
-FROM silver.solar_data
-WHERE production_kw IS NOT NULL;
-
--- Temperature statistics
-SELECT 
-    'Temperature (C)' as metric,
-    MIN(temperature_c) as min_value,
-    MAX(temperature_c) as max_value,
-    AVG(temperature_c) as avg_value,
-    STDEV(temperature_c) as std_dev
-FROM silver.solar_data
-WHERE temperature_c IS NOT NULL;
-
--- Efficiency ratio statistics
-SELECT 
-    'Efficiency Ratio' as metric,
-    MIN(efficiency_ratio) as min_value,
-    MAX(efficiency_ratio) as max_value,
-    AVG(efficiency_ratio) as avg_value,
-    STDEV(efficiency_ratio) as std_dev
-FROM silver.solar_data
-WHERE efficiency_ratio IS NOT NULL;
-GO
-
--- ============================================================
--- 5. CLOUD CONDITION DISTRIBUTION
--- ============================================================
-PRINT '';
-PRINT '5. CLOUD CONDITION DISTRIBUTION';
-PRINT '------------------------------------------------------------';
-
-DECLARE @total_rows2 INT;
-SELECT @total_rows2 = COUNT(*) FROM silver.solar_data;
+SELECT '3. SILVER SOLAR QUALITY' as section;
 
 SELECT 
-    ISNULL(cloud_condition, 'Unknown') as cloud_condition,
-    COUNT(*) as row_count,
-    CAST(100.0 * COUNT(*) / @total_rows2 AS DECIMAL(5,1)) as percentage,
+    COUNT(*) as total_records,
+    COUNT(CASE WHEN is_valid THEN 1 END) as valid_records,
+    COUNT(CASE WHEN NOT is_valid THEN 1 END) as invalid_records,
+    ROUND(100.0 * COUNT(CASE WHEN is_valid THEN 1 END) / COUNT(*), 2) as quality_pct,
+    COUNT(DISTINCT performance_category) as performance_categories,
+    AVG(efficiency_ratio) as avg_efficiency,
+    MIN(efficiency_ratio) as min_efficiency,
+    MAX(efficiency_ratio) as max_efficiency
+FROM silver_solar;
+
+-- ============================================================
+-- 4. SILVER WEATHER CATEGORY DISTRIBUTION
+-- ============================================================
+SELECT '4. WEATHER CATEGORY DISTRIBUTION' as section;
+
+SELECT 
+    'Temperature' as category_type,
+    temperature_category as category,
+    COUNT(*) as count,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage
+FROM silver_weather
+GROUP BY temperature_category
+ORDER BY count DESC;
+
+SELECT 
+    'Sky Condition' as category_type,
+    sky_condition as category,
+    COUNT(*) as count,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage
+FROM silver_weather
+GROUP BY sky_condition
+ORDER BY count DESC;
+
+-- ============================================================
+-- 5. SILVER SOLAR PERFORMANCE DISTRIBUTION
+-- ============================================================
+SELECT '5. SOLAR PERFORMANCE DISTRIBUTION' as section;
+
+SELECT 
+    performance_category,
+    COUNT(*) as readings,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage,
     AVG(production_kw) as avg_production,
     AVG(efficiency_ratio) as avg_efficiency
-FROM silver.solar_data
-GROUP BY cloud_condition
-ORDER BY row_count DESC;
-GO
-
--- ============================================================
--- 6. PANEL PERFORMANCE SUMMARY
--- ============================================================
-PRINT '';
-PRINT '6. TOP 5 BEST PERFORMING PANELS';
-PRINT '------------------------------------------------------------';
-
-SELECT TOP 5
-    panel_id,
-    COUNT(*) as readings,
-    AVG(production_kw) as avg_production,
-    AVG(efficiency_ratio) as avg_efficiency,
-    SUM(CASE WHEN is_valid = 0 THEN 1 ELSE 0 END) as quality_issues
-FROM silver.solar_data
-GROUP BY panel_id
-ORDER BY avg_production DESC;
-GO
-
-PRINT '';
-PRINT 'BOTTOM 5 WORST PERFORMING PANELS';
-PRINT '------------------------------------------------------------';
-
-SELECT TOP 5
-    panel_id,
-    COUNT(*) as readings,
-    AVG(production_kw) as avg_production,
-    AVG(efficiency_ratio) as avg_efficiency,
-    SUM(CASE WHEN is_valid = 0 THEN 1 ELSE 0 END) as quality_issues
-FROM silver.solar_data
-GROUP BY panel_id
-ORDER BY avg_production ASC;
-GO
-
--- ============================================================
--- 7. HOURLY PATTERNS
--- ============================================================
-PRINT '';
-PRINT '7. PRODUCTION BY HOUR OF DAY';
-PRINT '------------------------------------------------------------';
-
-SELECT 
-    ISNULL(CAST(production_hour AS VARCHAR), 'Unknown') as hour,
-    COUNT(*) as readings,
-    AVG(production_kw) as avg_production,
-    MAX(production_kw) as peak_production,
-    AVG(efficiency_ratio) as avg_efficiency
-FROM silver.solar_data
-WHERE is_valid = 1
-GROUP BY production_hour
+FROM silver_solar
+GROUP BY performance_category
 ORDER BY 
-    CASE WHEN production_hour IS NULL THEN 1 ELSE 0 END,
-    production_hour;
-GO
+    CASE performance_category
+        WHEN 'Excellent' THEN 1
+        WHEN 'Good' THEN 2
+        WHEN 'Fair' THEN 3
+        WHEN 'Poor' THEN 4
+        ELSE 5
+    END;
 
 -- ============================================================
--- 8. RECENT DATA CHECK
+-- 6. INVALID RECORDS ANALYSIS
 -- ============================================================
-PRINT '';
-PRINT '8. MOST RECENT 10 RECORDS';
-PRINT '------------------------------------------------------------';
+SELECT '6. INVALID RECORDS DETAIL' as section;
 
-SELECT TOP 10
-    timestamp,
-    panel_id,
-    production_kw,
-    ISNULL(cloud_condition, 'Unknown') as cloud_condition,
-    efficiency_ratio,
-    CASE WHEN is_valid = 1 THEN 'Valid' ELSE 'Invalid' END as status,
-    ISNULL(quality_issues, 'None') as quality_issues
-FROM silver.solar_data
-ORDER BY timestamp DESC;
-GO
+-- Weather invalid records
+SELECT 
+    'weather' as source,
+    COUNT(*) as count,
+    ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM silver_weather), 2) as percentage
+FROM silver_weather
+WHERE NOT is_valid;
+
+-- Solar invalid records by reason
+SELECT 
+    CASE 
+        WHEN production_kw < 0 THEN 'Negative production'
+        WHEN temperature_c < -30 OR temperature_c > 60 THEN 'Temperature out of range'
+        WHEN cloud_factor < 0 OR cloud_factor > 1 THEN 'Invalid cloud factor'
+        WHEN temp_efficiency < 0.5 OR temp_efficiency > 1.5 THEN 'Invalid efficiency'
+        ELSE 'Other'
+    END as reason,
+    COUNT(*) as count
+FROM silver_solar
+WHERE NOT is_valid
+GROUP BY reason
+ORDER BY count DESC;
 
 -- ============================================================
--- 9. FINAL VERDICT
+-- 7. TIME COVERAGE
 -- ============================================================
-PRINT '';
-PRINT '============================================================';
-PRINT 'VERIFICATION SUMMARY';
-PRINT '============================================================';
+SELECT '7. TIME COVERAGE' as section;
 
-DECLARE @total_rows3 INT;
-DECLARE @valid_rows3 INT;
-DECLARE @valid_pct3 DECIMAL(5,2);
-DECLARE @issues_found INT = 0;
-DECLARE @completeness_check INT;
+SELECT 
+    'silver_weather' as table_name,
+    MIN(timestamp) as earliest,
+    MAX(timestamp) as latest,
+    EXTRACT(DAY FROM MAX(timestamp) - MIN(timestamp)) as days_covered
+FROM silver_weather
+UNION ALL
+SELECT 
+    'silver_solar',
+    MIN(timestamp),
+    MAX(timestamp),
+    EXTRACT(DAY FROM MAX(timestamp) - MIN(timestamp))
+FROM silver_solar;
 
-SELECT @total_rows3 = COUNT(*) FROM silver.solar_data;
-SELECT @valid_rows3 = COUNT(*) FROM silver.solar_data WHERE is_valid = 1;
-SELECT @completeness_check = COUNT(*) FROM silver.solar_data WHERE panel_id IS NULL OR timestamp IS NULL OR event_id IS NULL;
+-- ============================================================
+-- 8. FINAL VERDICT
+-- ============================================================
+SELECT '==================================================' as line;
+SELECT 'SILVER LAYER VERDICT' as verdict;
+SELECT '==================================================' as line;
 
-IF @total_rows3 > 0
-    SET @valid_pct3 = (100.0 * @valid_rows3 / @total_rows3);
-ELSE
-    SET @valid_pct3 = 0;
+WITH quality_check AS (
+    SELECT 
+        COUNT(CASE WHEN is_valid THEN 1 END) * 1.0 / COUNT(*) as weather_quality
+    FROM silver_weather
+),
+solar_quality AS (
+    SELECT 
+        COUNT(CASE WHEN is_valid THEN 1 END) * 1.0 / COUNT(*) as solar_quality
+    FROM silver_solar
+)
+SELECT 
+    CASE 
+        WHEN (SELECT weather_quality FROM quality_check) > 0.95 
+             AND (SELECT solar_quality FROM solar_quality) > 0.95
+        THEN '✅ EXCELLENT - Data quality >95% in both tables'
+        WHEN (SELECT weather_quality FROM quality_check) > 0.8 
+             AND (SELECT solar_quality FROM solar_quality) > 0.8
+        THEN '⚠️ GOOD - Data quality >80% in both tables'
+        ELSE '❌ POOR - Data quality below 80% in one or more tables'
+    END as data_quality_verdict,
+    CONCAT(
+        'Weather: ', ROUND((SELECT weather_quality * 100 FROM quality_check), 1), '%, ',
+        'Solar: ', ROUND((SELECT solar_quality * 100 FROM solar_quality), 1), '%'
+    ) as quality_percentages;
 
--- Check 1: Has data
-IF @total_rows3 > 0 
-    PRINT 'PASS: Silver layer contains data (' + CAST(@total_rows3 AS VARCHAR) + ' rows)'
-ELSE
-BEGIN
-    PRINT 'FAIL: Silver layer is empty';
-    SET @issues_found = @issues_found + 1;
-END
-
--- Check 2: Data quality
-IF @valid_pct3 > 95
-    PRINT 'PASS: High data quality (' + CAST(ROUND(@valid_pct3, 1) AS VARCHAR) + '% valid)'
-ELSE IF @valid_pct3 > 80
-    PRINT 'WARNING: Moderate data quality (' + CAST(ROUND(@valid_pct3, 1) AS VARCHAR) + '% valid)'
-ELSE
-BEGIN
-    PRINT 'FAIL: Poor data quality (' + CAST(ROUND(@valid_pct3, 1) AS VARCHAR) + '% valid)';
-    SET @issues_found = @issues_found + 1;
-END
-
--- Check 3: Completeness of key columns
-IF @completeness_check = 0
-    PRINT 'PASS: All required columns are complete'
-ELSE
-BEGIN
-    PRINT 'FAIL: ' + CAST(@completeness_check AS VARCHAR) + ' rows missing required data';
-    SET @issues_found = @issues_found + 1;
-END
-
--- Final verdict
-PRINT '';
-PRINT '============================================================';
-IF @issues_found = 0
-    PRINT 'VERDICT: PASS - Silver layer data is healthy';
-ELSE IF @issues_found = 1
-    PRINT 'VERDICT: WARNING - Silver layer has 1 issue to review';
-ELSE
-    PRINT 'VERDICT: FAIL - Silver layer has ' + CAST(@issues_found AS VARCHAR) + ' issues to address';
-PRINT '============================================================';
-GO
+SELECT '==================================================' as line;

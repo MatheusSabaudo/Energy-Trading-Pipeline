@@ -1,4 +1,4 @@
-# producers/solar_producer.py
+# ingestion/iot/solar_producer.py
 import json
 import time
 import uuid
@@ -7,10 +7,14 @@ from datetime import datetime, timezone
 from confluent_kafka import Producer
 import sys
 import os
+from pathlib import Path
 
-# Add config to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'config'))
-import userdata_config as cfg
+# Add project root to path - FIX THIS
+project_root = Path(__file__).parent.parent.parent
+sys.path.append(str(project_root))
+
+# Now import works
+from config import userdata_config as cfg
 
 # Kafka configuration - FIXED VERSION
 KAFKA_CONF = {
