@@ -32,7 +32,7 @@ CREATE TABLE bronze.api_data (
     
     first_seen DATETIME2 DEFAULT GETDATE(),
 
-    CONSTRAINT PK_api_data PRIMARY KEY (event_id),
+    CONSTRAINT PK_api_data PRIMARY KEY (event_id)
     
 );
 
