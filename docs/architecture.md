@@ -1,6 +1,5 @@
 ## 📄 **`docs/architecture.md`**
 
-```markdown
 # Solar Pipeline Architecture
 
 ## 🏗️ System Overview
