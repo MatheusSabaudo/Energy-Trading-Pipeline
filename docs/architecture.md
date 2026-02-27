@@ -7,7 +7,7 @@
 The Solar Pipeline is a complete data engineering solution that ingests weather data from WeatherStack API and simulated IoT solar panel data through Kafka, processes it through a medallion architecture (Bronze, Silver, Gold layers), and provides monitoring and alerting capabilities.
 
 ## 📊 Architecture Diagram
-
+```markdown
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        DATA SOURCES                                  │
 └─────────────────────────────────────────────────────────────────────┘
@@ -64,7 +64,7 @@ The Solar Pipeline is a complete data engineering solution that ingests weather 
     │   Monitoring  │               │   Apache      │
     │   & Alerts    │               │   Airflow     │
     └───────────────┘               └───────────────┘
-
+```
 ## 🏛️ Architecture Layers
 
 ### 1. **Ingestion Layer**
