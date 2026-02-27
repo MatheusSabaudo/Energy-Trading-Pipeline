@@ -1,55 +1,58 @@
-USE EnergyTradingPipeline;
-GO
+-- postgres/bronze/ddl_bronze.sql
+-- Bronze Layer - Raw Data Tables
 
-IF OBJECT_ID('bronze.api_data', 'U') IS NOT NULL
-    DROP TABLE bronze.api_data;
+\c solar_data;
 
-CREATE TABLE bronze.api_data (
-    event_id UNIQUEIDENTIFIER,
-    
-    timestamp DATETIME2,
-    
-    panel_id VARCHAR(50),
-    panel_type VARCHAR(50),
-    panel_power_kw DECIMAL(5,2),    -- 999.99 max
-    production_kw DECIMAL(8,3),     -- 99999.999 max
-    temperature_c DECIMAL(5,1),     -- 999.9°C max
-    cloud_factor DECIMAL(3,2),       -- 0.00 to 9.99
-    temp_efficiency DECIMAL(4,3),    -- 0.000 to 9.999
-    actual_status VARCHAR(255),
-    city VARCHAR(50),
+-- ============================================================
+-- BRONZE: Weather data from API
+-- ============================================================
+-- This table already exists from init.sql
+-- Included here for reference and completeness
 
-    ingestion_time DATETIME2,
-    
-    kafka_topic VARCHAR(50),
-    kafka_partition INT,
-    kafka_offset BIGINT,
-    source_file VARCHAR(100),
+COMMENT ON TABLE weather_data IS 'Bronze layer - Raw weather data from WeatherStack API';
+COMMENT ON COLUMN weather_data.id IS 'Surrogate primary key';
+COMMENT ON COLUMN weather_data.city IS 'City name';
+COMMENT ON COLUMN weather_data.timestamp IS 'Local timestamp';
+COMMENT ON COLUMN weather_data.temperature IS 'Temperature in Celsius';
+COMMENT ON COLUMN weather_data.humidity IS 'Humidity percentage';
+COMMENT ON COLUMN weather_data.wind_speed IS 'Wind speed in km/h';
+COMMENT ON COLUMN weather_data.wind_direction IS 'Wind direction';
+COMMENT ON COLUMN weather_data.pressure IS 'Atmospheric pressure';
+COMMENT ON COLUMN weather_data.precipitation IS 'Precipitation in mm';
+COMMENT ON COLUMN weather_data.cloud_cover IS 'Cloud cover percentage';
+COMMENT ON COLUMN weather_data.uv_index IS 'UV index';
+COMMENT ON COLUMN weather_data.weather_code IS 'Weather condition code';
+COMMENT ON COLUMN weather_data.weather_description IS 'Text description';
+COMMENT ON COLUMN weather_data.is_day IS 'Day or night';
+COMMENT ON COLUMN weather_data.observation_time IS 'Time of observation';
+COMMENT ON COLUMN weather_data.ingestion_timestamp IS 'When data was ingested';
 
-    raw_json NVARCHAR(MAX) NOT NULL,
+-- ============================================================
+-- BRONZE: Solar panel readings from IoT
+-- ============================================================
+COMMENT ON TABLE solar_panel_readings IS 'Bronze layer - Raw IoT solar panel data';
+COMMENT ON COLUMN solar_panel_readings.id IS 'Surrogate primary key';
+COMMENT ON COLUMN solar_panel_readings.event_id IS 'Unique event identifier';
+COMMENT ON COLUMN solar_panel_readings.timestamp IS 'Reading timestamp';
+COMMENT ON COLUMN solar_panel_readings.panel_id IS 'Panel identifier';
+COMMENT ON COLUMN solar_panel_readings.panel_type IS 'Type of solar panel';
+COMMENT ON COLUMN solar_panel_readings.panel_power_kw IS 'Panel rated power in kW';
+COMMENT ON COLUMN solar_panel_readings.production_kw IS 'Current production in kW';
+COMMENT ON COLUMN solar_panel_readings.temperature_c IS 'Panel temperature in Celsius';
+COMMENT ON COLUMN solar_panel_readings.cloud_factor IS 'Cloud coverage factor (0-1)';
+COMMENT ON COLUMN solar_panel_readings.temp_efficiency IS 'Temperature efficiency factor';
+COMMENT ON COLUMN solar_panel_readings.status IS 'Panel status';
+COMMENT ON COLUMN solar_panel_readings.city IS 'Location city';
+COMMENT ON COLUMN solar_panel_readings.ingestion_timestamp IS 'When data was ingested';
 
-    is_processed BIT DEFAULT 0,
-    
-    first_seen DATETIME2 DEFAULT GETDATE(),
+-- Create indexes if not exists (safety check)
+CREATE INDEX IF NOT EXISTS idx_weather_timestamp ON weather_data(timestamp);
+CREATE INDEX IF NOT EXISTS idx_weather_city ON weather_data(city);
+CREATE INDEX IF NOT EXISTS idx_solar_timestamp ON solar_panel_readings(timestamp);
+CREATE INDEX IF NOT EXISTS idx_solar_panel ON solar_panel_readings(panel_id);
+CREATE INDEX IF NOT EXISTS idx_solar_event ON solar_panel_readings(event_id);
 
-    CONSTRAINT PK_api_data PRIMARY KEY (event_id)
-    
-);
-
--- SPEED UP QUERIES BY TIME USING INDEXES
--- CREATED INDEXES FOR THE MOST COMMON / CRITICAL QUERIES
-
--- Query 1: Find data by time range (VERY COMMON)
-CREATE INDEX idx_bronze_timestamp ON bronze.api_data(timestamp);
-
--- Query 2: Look up specific panel (VERY COMMON)
-CREATE INDEX idx_bronze_panel ON bronze.api_data(panel_id);
-
--- Query 3: Find unprocessed data for ETL (CRITICAL)
-CREATE INDEX idx_bronze_processed ON bronze.api_data(is_processed);
-
--- Query 4: Monitor ingestion rates (OFTEN)
-CREATE INDEX idx_bronze_ingestion ON bronze.api_data(ingestion_time);
-
-
-SELECT * FROM bronze.api_data;
+-- Row counts
+SELECT 'weather_data' as table_name, COUNT(*) as row_count FROM weather_data
+UNION ALL
+SELECT 'solar_panel_readings', COUNT(*) FROM solar_panel_readings;
