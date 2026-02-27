@@ -9,7 +9,7 @@ The Solar Pipeline is a complete data engineering solution that ingests weather 
 ## 📊 Architecture Diagram
 ```markdown
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        DATA SOURCES                                  │
+│                        DATA SOURCES                                 │
 └─────────────────────────────────────────────────────────────────────┘
                               │
             ┌─────────────────┴─────────────────┐
