@@ -53,6 +53,8 @@ BATTERY_PARAMS = {
 
 PANEL_PARAMS = {
 
+    'panels': 10,                           # Number of panels installed
+
     # Panel specifications
     'panel_power_kw': 3.0,                  # kWp - nominal power under STC
     'panel_efficiency': 0.19,               # 19% - percentage of sunlight converted

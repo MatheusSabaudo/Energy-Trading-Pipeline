@@ -21,7 +21,7 @@ KAFKA_CONF = {
 producer = Producer(KAFKA_CONF)
 
 # Use values from your config
-PANEL_IDS = [f"PV-{i:03d}" for i in range(1, 11)]
+PANEL_IDS = [f"IoT-Data-Panel-{i:03d}" for i in range(1, cfg.PANEL_PARAMS['panels'])] # Name the panel with an ID (i) in range of the panels installed
 PANEL_POWER = cfg.PANEL_PARAMS['panel_power_kw']
 CITY = "Turin"
 
@@ -36,7 +36,7 @@ def generate_solar_event(panel_id):
     """Generate realistic solar production data using config values"""
     current_hour = datetime.now().hour
     
-    # Solar angle factor (peak at noon)
+    # Solar angle factor (peak at noon) - range 0 to 1
     solar_factor = max(0, 1 - abs(current_hour - 12) / 12)
     
     # Base production using your panel parameters from config
@@ -82,7 +82,7 @@ def main():
     try:
         while True:
             for panel_id in PANEL_IDS:
-                # Generate event
+                # Generate event -> each panel have different values
                 event = generate_solar_event(panel_id)
                 
                 # Serialize to JSON
@@ -99,7 +99,7 @@ def main():
                 # Trigger delivery reports
                 producer.poll(0)
                 
-                print(f"Sent: {panel_id} - {event['production_kw']} kW")
+                print(f"Sent: {panel_id} - {event['production_kw']} kW\n")
                 
                 # Small delay between messages
                 time.sleep(0.1)
