@@ -1,6 +1,5 @@
 ## 📄 **`docs/data_dictionary.md`**
 
-```markdown
 # Data Dictionary
 
 ## 📊 Database: `solar_data`
@@ -367,4 +366,3 @@ ORDER BY hour DESC;
 | Critical | Immediate attention required | Alert immediately |
 | Warning | Investigate soon | Monitor |
 | Info | Normal operation | No action |
-```
