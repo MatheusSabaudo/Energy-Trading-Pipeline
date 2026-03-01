@@ -1,5 +1,6 @@
-# consumers/kafka_to_postgres.py
-from confluent_kafka import Consumer, KafkaError
+# FETCH THE DATA FROM THE API AND SEND TO THE POSTGRES DB
+
+from confluent_kafka import Consumer, KafkaError  #Consumer Setup
 import psycopg2
 import json
 import logging
@@ -7,7 +8,7 @@ import sys
 import os
 
 # Add config to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'config'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..', 'config'))
 import userdata_config as cfg
 
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +23,7 @@ KAFKA_CONF = {
 
 # PostgreSQL configuration
 PG_CONFIG = {
-    'dbname': 'airflow',
+    'dbname': 'solar_data',
     'user': 'airflow',
     'password': 'airflow',
     'host': 'localhost',
@@ -55,7 +56,7 @@ def save_to_postgres(event):
         conn.commit()
         cur.close()
         conn.close()
-        logger.info(f"Saved {event['panel_id']} to PostgreSQL")
+        logger.info(f"Saved IoT data from: {event['panel_id']} to PostgreSQL")
     except Exception as e:
         logger.error(f"Error saving to PostgreSQL: {e}")
 

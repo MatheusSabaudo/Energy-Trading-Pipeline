@@ -8,7 +8,7 @@
 API_CONFIG = {
     'weatherstack': {
         'base_url': 'http://api.weatherstack.com',
-        'access_key': '2cfa7ad15ad224c023a84f5a980f6fda',  # Replace with your actual key
+        'access_key': '',  # Replace with your actual key
         'endpoints': {
             'current': '/current',
             'historical': '/historical'
@@ -53,7 +53,7 @@ API_TABLE_SCHEMA = {
 }
 
 # ============================================
-# IOT TABLE SCHEMA (for later)
+# IOT TABLE SCHEMA 
 # ============================================
 IOT_TABLE_SCHEMA = {
     'table_name': 'solar_panel_readings',

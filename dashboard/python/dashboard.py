@@ -66,7 +66,7 @@ def plot_recent_production():
     plt.tight_layout()
     plt.savefig('dashboard/recent_production.png')
     plt.close()
-    print("✅ Chart saved to dashboard/recent_production.png")
+    print("Chart saved to dashboard/recent_production.png")
 
 def print_summary():
     """Print current summary"""
@@ -74,23 +74,23 @@ def print_summary():
     daily = get_daily_summary()
     
     print("=" * 60)
-    print("📊 SOLAR PRODUCTION DASHBOARD")
+    print("SOLAR PRODUCTION DASHBOARD")
     print("=" * 60)
     print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     if not daily.empty:
-        print(f"\n📅 TODAY'S SUMMARY:")
+        print(f"\nTODAY'S SUMMARY:")
         print(f"   Total production: {daily['total_production'].values[0]:.2f} kWh")
         print(f"   Average production: {daily['avg_production'].values[0]:.2f} kW")
         print(f"   Readings: {daily['readings'].values[0]}")
     
     if not df.empty:
-        print(f"\n⚡ LAST 5 MINUTES:")
+        print(f"\nLAST 5 MINUTES:")
         print(f"   Current production: {df['production_kw'].mean():.2f} kW avg")
         print(f"   Active panels: {df['panel_id'].nunique()}")
         print(f"   Temperature: {df['temperature_c'].mean():.1f}°C")
     
-    print("\n📈 LATEST READINGS:")
+    print("\nLATEST READINGS:")
     print(df.head(10).to_string(index=False))
 
 if __name__ == "__main__":
