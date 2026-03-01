@@ -1,7 +1,7 @@
 #!/bin/bash
 # ingestion/scripts/create-topics.sh
 
-echo "🚀 Creating Kafka topics..."
+echo "Creating Kafka topics..."
 
 # Create solar-raw topic
 docker exec kafka /opt/kafka/bin/kafka-topics.sh \
@@ -17,4 +17,4 @@ docker exec kafka /opt/kafka/bin/kafka-topics.sh \
     --list \
     --bootstrap-server localhost:9092
 
-echo "✅ Topic creation complete"
+echo "Topic creation complete"
