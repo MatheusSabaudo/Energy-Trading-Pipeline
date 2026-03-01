@@ -31,7 +31,7 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
 ---
 
 ## 🏗️ Architecture
-
+```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        DATA SOURCES                                 │
 └─────────────────────────────────────────────────────────────────────┘
@@ -93,7 +93,7 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
                                           │    Monitoring     │
                                           │    & Alerts       │
                                           └───────────────────┘
----
+```
 
 ## 📁 Project Structure
 
