@@ -1,4 +1,5 @@
-# ingestion/iot/iot_to_postgres.py
+#FETCH DATA FROM THE IOT DEVICES AND SEND TO THE POSTGRES DB
+
 from confluent_kafka import Consumer, KafkaError
 import psycopg2
 import json
@@ -22,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ============================================
-# KAFKA CONFIGURATION - FIXED VERSION
+# KAFKA CONFIGURATION
 # ============================================
 KAFKA_CONF = {
     'bootstrap.servers': 'localhost:9093',
