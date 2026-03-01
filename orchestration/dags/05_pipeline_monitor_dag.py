@@ -4,12 +4,12 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import datetime, timedelta
 
 default_args = {
-    'owner': 'solar_team',
+    'owner': 'Matheus Sabaudo Rodrigues',
     'depends_on_past': False,
     'start_date': datetime(2026, 1, 1),
     'email_on_failure': True,
-    'email_on_retry': False,
-    'email': ['admin@msr.com'],
+    'email_on_retry': True,
+    'email': ['matteosabaudo@outlook.it'],
     'retries': 1,
     'retry_delay': timedelta(minutes=5)
 }
@@ -41,7 +41,7 @@ def calculate_pipeline_health():
         health_score -= 10
         deductions.append(f"Data delay: -10 ({hours_since:.1f} hours)")
     else:
-        print(f"✓ Data fresh: {hours_since:.1f} hours")
+        print(f"SUCCESS: Data fresh: {hours_since:.1f} hours")
     
     # ============================================================
     # 2. Anomaly Scoring with weighted categories
@@ -71,7 +71,7 @@ def calculate_pipeline_health():
     if anomaly_penalty > 0:
         deductions.append(f"Anomalies: -{anomaly_penalty} ({critical_real} critical real, {critical_missing} missing, {warning} warning)")
     else:
-        print("✓ No open anomalies")
+        print("SUCCESS: No open anomalies")
     
     # ============================================================
     # 3. Data Quality (Max 20 points deduction)
@@ -83,7 +83,7 @@ def calculate_pipeline_health():
     quality = cursor.fetchone()[0]
     
     if quality is None:
-        print("ℹ️ No quality data available for last 7 days")
+        print("INFO: No quality data available for last 7 days")
     elif quality < 80:
         health_score -= 20
         deductions.append(f"Poor data quality: -20 ({quality:.1f}%)")
@@ -91,7 +91,7 @@ def calculate_pipeline_health():
         health_score -= 10
         deductions.append(f"Fair data quality: -10 ({quality:.1f}%)")
     else:
-        print(f"✓ Good data quality: {quality:.1f}%")
+        print(f"SUCCESS: Good data quality: {quality:.1f}%")
     
     # ============================================================
     # 4. Pipeline Completeness (Check if all tables have data)
@@ -128,23 +128,23 @@ def calculate_pipeline_health():
         for d in deductions:
             print(f"  {d}")
     else:
-        print("✓ No deductions - Pipeline fully healthy!")
+        print("SUCCESS: No deductions - Pipeline fully healthy!")
     
-    print(f"\n📊 FINAL HEALTH SCORE: {health_score}/100")
+    print(f"\nFINAL HEALTH SCORE: {health_score}/100")
     
     # Determine health status
     if health_score >= 90:
         status = "EXCELLENT"
-        print(f"STATUS: ✅ {status} - All systems operational")
+        print(f"STATUS: SUCCESS {status} - All systems operational")
     elif health_score >= 70:
         status = "GOOD"
-        print(f"STATUS: 👍 {status} - Minor issues detected")
+        print(f"STATUS: OK {status} - Minor issues detected")
     elif health_score >= 50:
         status = "FAIR"
-        print(f"STATUS: ⚠️ {status} - Issues require attention")
+        print(f"STATUS: WARNING {status} - Issues require attention")
     else:
         status = "POOR"
-        print(f"STATUS: ❌ {status} - Critical issues - Investigate immediately!")
+        print(f"STATUS: {status} - Critical issues - Investigate immediately!")
         raise Exception(f"Pipeline health critical: {health_score}/100 - Immediate attention required!")
     
     print("="*60)
