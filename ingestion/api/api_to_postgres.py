@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Kafka configuration
 KAFKA_CONF = {
     'bootstrap.servers': 'localhost:9093',
-    'group.id': 'solar-processor-group',
+    'group.id': 'solar-api-consumer',
     'auto.offset.reset': 'earliest'
 }
 
