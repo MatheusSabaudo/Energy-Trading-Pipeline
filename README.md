@@ -50,45 +50,45 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
       │   (hourly)    │                     │  (solar-raw)  │
       └───────┬───────┘                     └───────┬───────┘
               │                                     │
-              └──────────────────┬──────────────────┘
-                                 ▼
-                    ┌─────────────────────────┐
-                    │        PostgreSQL       │
-                    │       (solar_data)      │
-                    └─────────────┬───────────┘
-                                  │
-                  ┌───────────────┴───────────────┐
-                  ▼                               ▼
-          ┌───────────────┐               ┌───────────────┐
-          │ weather_data  │               │  solar_panel  │
-          │   (Bronze)    │               │    readings   │
-          └───────┬───────┘               └───────┬───────┘
-                  │                               │
-                  └───────────────┬───────────────┘
-                                  ▼
-                    ┌─────────────────────────┐
-                    │     Silver Layer        │
-                    │  (Cleaned & Enriched)   │
-                    │ - silver_weather        │
-                    │ - silver_solar          │
-                    └─────────────┬───────────┘
-                                  │
-                                  ▼
-                    ┌─────────────────────────┐
-                    │     Gold Layer          │
-                    │   (Aggregated Data)     │
-                    │ - gold_daily_panel      │
-                    │ - gold_hourly_system    │
-                    │ - gold_monthly_kpis     │
-                    │ - gold_anomalies        │
-                    └─────────────┬───────────┘
-                                  │
-                  ┌───────────────┴───────────────┐
-                  ▼                               ▼
-          ┌───────────────┐               ┌───────────────┐
-          │   Monitoring  │               │   Apache      │
-          │   & Alerts    │               │   Airflow     │
-          └───────────────┘               └───────────────┘
+              └────────────────────┬────────────────┘
+                                   ▼
+                      ┌─────────────────────────┐
+                      │        PostgreSQL       │
+                      │       (solar_data)      │
+                      └─────────────┬───────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+            ┌───────────────┐               ┌───────────────┐
+            │ weather_data  │               │  solar_panel  │
+            │   (Bronze)    │               │    readings   │
+            └───────┬───────┘               └───────┬───────┘
+                    │                               │
+                    └───────────────┬───────────────┘
+                                    ▼
+                      ┌─────────────────────────┐
+                      │     Silver Layer        │
+                      │  (Cleaned & Enriched)   │
+                      │ - silver_weather        │
+                      │ - silver_solar          │
+                      └─────────────┬───────────┘
+                                    │
+                                    ▼
+                      ┌─────────────────────────┐
+                      │     Gold Layer          │
+                      │   (Aggregated Data)     │
+                      │ - gold_daily_panel      │
+                      │ - gold_hourly_system    │
+                      │ - gold_monthly_kpis     │
+                      │ - gold_anomalies        │
+                      └─────────────┬───────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+            ┌───────────────┐               ┌───────────────┐
+            │   Monitoring  │               │   Apache      │
+            │   & Alerts    │               │   Airflow     │
+            └───────────────┘               └───────────────┘
 ```
 
 ---
