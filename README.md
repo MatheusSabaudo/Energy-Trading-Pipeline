@@ -31,96 +31,98 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
 ---
 
 ## 🏗️ Architecture
-
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        DATA SOURCES                                  │
+│                        DATA SOURCES                                 │
 └─────────────────────────────────────────────────────────────────────┘
-                              │
-            ┌─────────────────┴─────────────────┐
-            ▼                                   ▼
-┌───────────────────────┐             ┌───────────────────────┐
-│   WEATHERSTACK API    │             │   IOT SIMULATOR       │
-│   (weatherstack.com)  │             │   (Kafka Producer)    │
-└───────────┬───────────┘             └───────────┬───────────┘
-            │                                     │
-            ▼                                     ▼
-    ┌───────────────┐                     ┌───────────────┐
-    │  Python Fetch │                     │    Kafka      │
-    │   (hourly)    │                     │  (solar-raw)  │
-    └───────┬───────┘                     └───────┬───────┘
-            │                                     │
-            └──────────────┬──────────────────────┘
-                           ▼
-              ┌─────────────────────────┐
-              │     PostgreSQL          │
-              │     (solar_data)        │
-              └─────────────┬───────────┘
-                            │
-            ┌───────────────┴───────────────┐
-            ▼                               ▼
-    ┌───────────────┐               ┌───────────────┐
-    │  weather_data │               │solar_panel_   │
-    │   (Bronze)    │               │  readings     │
-    └───────┬───────┘               └───────┬───────┘
-            │                               │
-            └───────────────┬───────────────┘
-                            ▼
-              ┌─────────────────────────┐
-              │     Silver Layer        │
-              │  (Cleaned & Enriched)   │
-              │ - silver_weather        │
-              │ - silver_solar          │
-              └─────────────┬───────────┘
-                            │
-                            ▼
-              ┌─────────────────────────┐
-              │     Gold Layer          │
-              │   (Aggregated Data)     │
-              │ - gold_daily_panel      │
-              │ - gold_hourly_system    │
-              │ - gold_monthly_kpis     │
-              │ - gold_anomalies        │
-              └─────────────┬───────────┘
-                            │
-            ┌───────────────┴───────────────┐
-            ▼                               ▼
-    ┌───────────────┐               ┌───────────────┐
-    │   Monitoring  │               │   Apache      │
-    │   & Alerts    │               │   Airflow     │
-    └───────────────┘               └───────────────┘
+                                  │
+                ┌─────────────────┴─────────────────┐
+                ▼                                   ▼
+  ┌───────────────────────┐             ┌───────────────────────┐
+  │   WEATHERSTACK API    │             │   IOT SIMULATOR       │
+  │   (weatherstack.com)  │             │   (Kafka Producer)    │
+  └───────────┬───────────┘             └───────────┬───────────┘
+              │                                     │
+              ▼                                     ▼
+      ┌───────────────┐                     ┌───────────────┐
+      │  Python Fetch │                     │    Kafka      │
+      │   (hourly)    │                     │  (solar-raw)  │
+      └───────┬───────┘                     └───────┬───────┘
+              │                                     │
+              └────────────────────┬────────────────┘
+                                   ▼
+                      ┌─────────────────────────┐
+                      │        PostgreSQL       │
+                      │       (solar_data)      │
+                      └─────────────┬───────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+            ┌───────────────┐               ┌───────────────┐
+            │ weather_data  │               │  solar_panel  │
+            │   (Bronze)    │               │    readings   │
+            └───────┬───────┘               └───────┬───────┘
+                    │                               │
+                    └───────────────┬───────────────┘
+                                    │
+                                    ▼
+                    ┌───────────────────────────────┐
+                    │        Apache Airflow         │
+                    │      (Orchestration Layer)    │
+                    │  ┌─────────────────────────┐  │
+                    │  │ 02_silver_transform_dag │  │
+                    │  │ 03_gold_load_dag        │  │
+                    │  │ 04_anomaly_detection_dag│  │
+                    │  └─────────────────────────┘  │
+                    └───────────────┬───────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+        ┌───────────────────┐             ┌─────────────────────┐
+        │   Silver Layer    │             │    Gold Layer       │
+        │  (Cleaned Data)   │             │ (Aggregated Data)   │
+        │ - silver_weather  │             │ - gold_daily_panel  │
+        │ - silver_solar    │             │ - gold_hourly_      │
+        └───────────────────┘             │   system            │
+                                          │ - gold_monthly_kpis │
+                                          │ - gold_anomalies    │
+                                          └─────────────────────┘
+                                                      │
+                                                      ▼
+                                            ┌───────────────────┐
+                                            │    Monitoring     │
+                                            │    & Alerts       │
+                                            └───────────────────┘
 ```
-
----
 
 ## 📁 Project Structure
 
 ```
 Energy-Trading-Pipeline/
 │
-├── 📁 config/                          # Configuration files
-│   └── userdata_config.py               # Central configuration
+├── 📁 config/                                # Configuration files
+│   └── userdata_config.py                    # Central configuration
 │
-├── 📁 ingestion/                        # Data ingestion
-│   ├── 📁 api/                          # Weather API
-│   │   └── weatherstack_fetcher.py      # WeatherStack API client
-│   ├── 📁 iot/                          # IoT simulation
-│   │   ├── solar_producer.py            # Kafka producer
-│   │   └── iot_to_postgres.py           # Kafka consumer
-│   └── 📁 scripts/                       # Utility scripts
-│       └── create-topics.sh              # Kafka topic setup
+├── 📁 ingestion/                             # Data ingestion
+│   ├── 📁 api/                              # Weather API
+│   │   └── weatherstack_fetcher.py           # WeatherStack API client
+│   ├── 📁 iot/                              # IoT simulation
+│   │   ├── solar_producer.py                 # Kafka producer
+│   │   └── iot_to_postgres.py                # Kafka consumer
+│   └── 📁 scripts/                          # Utility scripts
+│       └── create-topics.sh                  # Kafka topic setup
 │
-├── 📁 postgres/                          # Database scripts
-│   ├── 📁 init/                          # Initialization
-│   │   └── init.sql                       # Database schema
-│   ├── 📁 bronze/                         # Bronze layer
+├── 📁 postgres/                              # Database scripts
+│   ├── 📁 init/                              # Initialization
+│   │   └── init.sql                           # Database schema
+│   ├── 📁 bronze/                             # Bronze layer
 │   │   ├── ddl_bronze.sql
 │   │   └── data_verify.sql
-│   ├── 📁 silver/                         # Silver layer
+│   ├── 📁 silver/                             # Silver layer
 │   │   ├── ddl_silver.sql
 │   │   ├── silver_load.sql
 │   │   └── data_verify.sql
-│   └── 📁 gold/                           # Gold layer
+│   └── 📁 gold/                               # Gold layer
 │       ├── ddl_gold.sql
 │       ├── gold_load_daily.sql
 │       ├── gold_load_hourly.sql
@@ -128,31 +130,31 @@ Energy-Trading-Pipeline/
 │       ├── gold_load_anomalies.sql
 │       └── data_verify.sql
 │
-├── 📁 orchestration/                      # Airflow orchestration
-│   ├── 📁 dags/                           # DAG definitions
+├── 📁 orchestration/                          # Airflow orchestration
+│   ├── 📁 dags/                               # DAG definitions
 │   │   ├── 01_ingestion_dag.py
 │   │   ├── 02_silver_transform_dag.py
 │   │   ├── 03_gold_load_dag.py
 │   │   ├── 04_anomaly_detection_dag.py
 │   │   └── 05_pipeline_monitor_dag.py
-│   └── 📁 scripts/                         # Utility scripts
+│   └── 📁 scripts/                            # Utility scripts
 │       ├── check_kafka.py
 │       ├── check_postgres.py
 │       └── alert.py
 │
-├── 📁 monitoring/                          # Monitoring & alerts
+├── 📁 monitoring/                             # Monitoring & alerts
 │   ├── health_checks.sql
 │   └── 📁 alerts/
 │       └── anomaly_alerts.py
 │
-├── 📁 docs/                                # Documentation
+├── 📁 docs/                                   # Documentation
 │   ├── architecture.md
 │   ├── data_dictionary.md
 │   └── setup_guide.md
 │
-├── 🐳 docker-compose.yml                    # Docker services
-├── 📝 requirements.txt                      # Python dependencies
-└── 📚 README.md                              # This file
+├── 🐳 docker-compose.yml                      # Docker services
+├── 📝 requirements.txt                        # Python dependencies
+└── 📚 README.md                                # This file
 ```
 
 ---
@@ -181,20 +183,23 @@ pip install -r requirements.txt
 # 3. Configure API key
 # Edit config/userdata_config.py and add your WeatherStack API key
 
-# 4. Start Docker services
+# 4. Configure Alerts - orchestration/scripts/alert
+# Edit SMTP server, sender, password, recipients, Slack webhook.
+
+# 5. Start Docker services
 docker-compose up -d
 sleep 30  # Wait for services to initialize
 
-# 5. Create Kafka topics
+# 6. Create Kafka topics
 chmod +x ingestion/scripts/create-topics.sh
 ./ingestion/scripts/create-topics.sh
 
-# 6. Initialize database
+# 7. Initialize database
 docker cp postgres/init/init.sql postgres:/tmp/
 docker exec -it postgres psql -U airflow -d postgres -c "CREATE DATABASE solar_data;"
 docker exec -it postgres psql -U airflow -d solar_data -f /tmp/init.sql
 
-# 7. Start the pipeline
+# 8. Start the pipeline
 # Terminal 1: IoT Producer
 python ingestion/iot/solar_producer.py
 
