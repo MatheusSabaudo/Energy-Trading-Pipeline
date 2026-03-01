@@ -30,7 +30,7 @@ def check_bronze_data():
     cursor.close()
     conn.close()
     
-    print(f"📊 Bronze status:")
+    print(f"Bronze status:")
     print(f"   Weather: {result[0]} records, last: {result[2]}")
     print(f"   Solar: {result[1]} records, last: {result[3]}")
     
