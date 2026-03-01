@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Anomaly Alert System - Simplified
+Anomaly Alert System
 Sends alerts for critical anomalies detected in the pipeline
 """
 
@@ -67,7 +67,7 @@ def get_active_anomalies():
         return critical, warning
         
     except Exception as e:
-        print(f"❌ Failed to fetch anomalies: {e}")
+        print(f"Failed to fetch anomalies: {e}")
         return 0, 0
 
 def check_data_freshness():
@@ -89,7 +89,7 @@ def check_data_freshness():
         return hours_delayed or 0
         
     except Exception as e:
-        print(f"❌ Failed to check data freshness: {e}")
+        print(f"Failed to check data freshness: {e}")
         return 0
 
 def check_data_quality():
@@ -112,7 +112,7 @@ def check_data_quality():
         return avg_quality or 100
         
     except Exception as e:
-        print(f"❌ Failed to check data quality: {e}")
+        print(f"Failed to check data quality: {e}")
         return 100
 
 def console_alert(message, severity):
@@ -121,7 +121,7 @@ def console_alert(message, severity):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     print(f"\n{border}")
-    print(f"🔔 ALERT - {severity}")
+    print(f"ALERT - {severity}")
     print(border)
     print(f"Time: {timestamp}")
     print(message)
@@ -170,13 +170,13 @@ def check_and_alert():
     # Send alert if needed
     if should_alert:
         message = f"Alert triggered: {', '.join(alert_reasons)}\n"
-        message += f"📊 Summary: {critical_count} critical, {warning_count} warnings, "
+        message += f"Summary: {critical_count} critical, {warning_count} warnings, "
         message += f"{hours_delayed:.1f}h delay, {avg_quality:.1f}% quality"
         console_alert(message, severity)
         return 2 if severity == 'CRITICAL' else 1
     else:
         message = "No action needed - all systems normal\n"
-        message += f"📊 Summary: {critical_count} critical, {warning_count} warnings, "
+        message += f"Summary: {critical_count} critical, {warning_count} warnings, "
         message += f"{hours_delayed:.1f}h delay, {avg_quality:.1f}% quality"
         console_alert(message, 'INFO')
         return 0
