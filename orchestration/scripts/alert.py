@@ -74,10 +74,10 @@ def send_email_alert(subject, message, severity):
         server.send_message(msg)
         server.quit()
         
-        print(f"✅ Email alert sent to {len(ALERT_CONFIG['email']['recipients'])} recipients")
+        print(f"Email alert sent to {len(ALERT_CONFIG['email']['recipients'])} recipients")
         
     except Exception as e:
-        print(f"❌ Failed to send email alert: {e}")
+        print(f"Failed to send email alert: {e}")
 
 def send_slack_alert(subject, message, severity):
     """Send Slack alert via webhook"""
@@ -109,12 +109,12 @@ def send_slack_alert(subject, message, severity):
         
         response = requests.post(ALERT_CONFIG['slack']['webhook_url'], json=payload)
         if response.status_code == 200:
-            print("✅ Slack alert sent")
+            print("Slack alert sent")
         else:
-            print(f"❌ Slack alert failed: {response.status_code}")
+            print(f"Slack alert failed: {response.status_code}")
             
     except Exception as e:
-        print(f"❌ Failed to send Slack alert: {e}")
+        print(f"Failed to send Slack alert: {e}")
 
 def console_alert(subject, message, severity):
     """Print alert to console"""
@@ -125,7 +125,7 @@ def console_alert(subject, message, severity):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     print(f"\n{border}")
-    print(f"🔔 ALERT - {severity}")
+    print(f"ALERT - {severity}")
     print(border)
     print(f"Time: {timestamp}")
     print(f"Subject: {subject}")

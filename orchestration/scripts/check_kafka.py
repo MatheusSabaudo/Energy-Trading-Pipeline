@@ -33,18 +33,18 @@ def check_kafka_connection(broker=KAFKA_BROKER, timeout=5):
         sock.close()
         
         if result != 0:
-            print(f"❌ Cannot connect to Kafka at {broker}")
+            print(f"Cannot connect to Kafka at {broker}")
             return False
         
         # Try to create a test producer
         producer = Producer({'bootstrap.servers': broker})
         # Try to get metadata
         metadata = producer.list_topics(timeout=timeout)
-        print(f"✅ Kafka broker at {broker} is reachable")
+        print(f"Kafka broker at {broker} is reachable")
         return True
         
     except Exception as e:
-        print(f"❌ Kafka connection failed: {e}")
+        print(f"Kafka connection failed: {e}")
         return False
 
 def check_topic_exists(topic='solar-raw', broker=KAFKA_BROKER):
@@ -55,15 +55,15 @@ def check_topic_exists(topic='solar-raw', broker=KAFKA_BROKER):
         
         topics = list(metadata.topics.keys())
         if topic in topics:
-            print(f"✅ Topic '{topic}' exists")
+            print(f"Topic '{topic}' exists")
             return True
         else:
-            print(f"❌ Topic '{topic}' does not exist")
+            print(f"Topic '{topic}' does not exist")
             print(f"   Available topics: {topics}")
             return False
             
     except Exception as e:
-        print(f"❌ Failed to list topics: {e}")
+        print(f"Failed to list topics: {e}")
         return False
 
 def check_kafka_health():
@@ -71,7 +71,7 @@ def check_kafka_health():
     print("\n" + "="*50)
     print("KAFKA HEALTH CHECK")
     print("="*50)
-    print(f"Environment: {'🐳 Docker' if IN_DOCKER else '💻 Host'}")
+    print(f"Environment: {'Docker' if IN_DOCKER else 'Host'}")
     print(f"Target: {KAFKA_BROKER}")
     print("="*50)
     
@@ -89,10 +89,10 @@ def check_kafka_health():
     
     print("\n" + "="*50)
     if all_topics_ok:
-        print("✅ All Kafka checks passed")
+        print("All Kafka checks passed")
         return 0
     else:
-        print("❌ Some Kafka checks failed")
+        print("Some Kafka checks failed")
         return 1
 
 if __name__ == "__main__":

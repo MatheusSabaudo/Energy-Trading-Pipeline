@@ -33,18 +33,18 @@ DB_CONFIG = {
     'database': 'solar_data'
 }
 
-print(f"🔍 Running {'inside Docker' if IN_DOCKER else 'on host machine'}")
-print(f"📡 Connecting to PostgreSQL at {DB_CONFIG['host']}:{DB_CONFIG['port']}")
+print(f"Running {'inside Docker' if IN_DOCKER else 'on host machine'}")
+print(f"Connecting to PostgreSQL at {DB_CONFIG['host']}:{DB_CONFIG['port']}")
 
 def check_connection():
     """Check if PostgreSQL is reachable"""
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         conn.close()
-        print(f"✅ PostgreSQL connection successful")
+        print(f"PostgreSQL connection successful")
         return True
     except OperationalError as e:
-        print(f"❌ PostgreSQL connection failed: {e}")
+        print(f"PostgreSQL connection failed: {e}")
         return False
 
 def check_database_exists():
@@ -63,14 +63,14 @@ def check_database_exists():
         conn.close()
         
         if exists:
-            print("✅ Database 'solar_data' exists")
+            print("Database 'solar_data' exists")
             return True
         else:
-            print("❌ Database 'solar_data' does not exist")
+            print("Database 'solar_data' does not exist")
             return False
             
     except Exception as e:
-        print(f"❌ Failed to check database: {e}")
+        print(f"Failed to check database: {e}")
         return False
 
 def check_tables():
@@ -100,23 +100,23 @@ def check_tables():
             """, (table,))
             exists = cur.fetchone()[0]
             if exists:
-                print(f"  ✅ {table}")
+                print(f"  OK (200) - {table}")
             else:
-                print(f"  ❌ {table}")
+                print(f"  ERROR - {table}")
                 missing_tables.append(table)
         
         cur.close()
         conn.close()
         
         if missing_tables:
-            print(f"\n❌ Missing tables: {', '.join(missing_tables)}")
+            print(f"\nMissing tables: {', '.join(missing_tables)}")
             return False
         else:
-            print("\n✅ All required tables exist")
+            print("\nAll required tables exist")
             return True
             
     except Exception as e:
-        print(f"❌ Failed to check tables: {e}")
+        print(f"Failed to check tables: {e}")
         return False
 
 def check_recent_data():
@@ -139,12 +139,12 @@ def check_recent_data():
         conn.close()
         
         if weather_count == 0 and solar_count == 0:
-            print("⚠️ No recent data in any table")
+            print("No recent data in any table")
             return False
         return True
         
     except Exception as e:
-        print(f"❌ Failed to check recent data: {e}")
+        print(f"Failed to check recent data: {e}")
         return False
 
 def check_postgres_health():
@@ -152,7 +152,7 @@ def check_postgres_health():
     print("\n" + "="*50)
     print("POSTGRESQL HEALTH CHECK")
     print("="*50)
-    print(f"Environment: {'🐳 Docker' if IN_DOCKER else '💻 Host'}")
+    print(f"Environment: {'Docker' if IN_DOCKER else 'Host'}")
     print(f"Target: {DB_CONFIG['host']}:{DB_CONFIG['port']}")
     print("="*50)
     
@@ -165,16 +165,16 @@ def check_postgres_health():
     
     failed = 0
     for name, check_func in checks:
-        print(f"\n📋 Checking {name}...")
+        print(f"\nChecking {name}...")
         if not check_func():
             failed += 1
     
     print("\n" + "="*50)
     if failed == 0:
-        print("✅ All PostgreSQL checks passed")
+        print("All PostgreSQL checks passed")
         return 0
     else:
-        print(f"❌ {failed} checks failed")
+        print(f"ERROR - {failed} checks failed")
         return 1
 
 if __name__ == "__main__":
