@@ -87,12 +87,12 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
                                           │ - gold_monthly_kpis │
                                           │ - gold_anomalies    │
                                           └─────────────────────┘
-                                                    │
-                                                    ▼
-                                          ┌───────────────────┐
-                                          │    Monitoring     │
-                                          │    & Alerts       │
-                                          └───────────────────┘
+                                                      │
+                                                      ▼
+                                            ┌───────────────────┐
+                                            │    Monitoring     │
+                                            │    & Alerts       │
+                                            └───────────────────┘
 ```
 
 ## 📁 Project Structure
