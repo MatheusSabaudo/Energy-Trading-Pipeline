@@ -100,29 +100,29 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
 ```
 Energy-Trading-Pipeline/
 │
-├── 📁 config/                          # Configuration files
-│   └── userdata_config.py               # Central configuration
+├── 📁 config/                                # Configuration files
+│   └── userdata_config.py                    # Central configuration
 │
-├── 📁 ingestion/                        # Data ingestion
-│   ├── 📁 api/                          # Weather API
-│   │   └── weatherstack_fetcher.py      # WeatherStack API client
-│   ├── 📁 iot/                          # IoT simulation
-│   │   ├── solar_producer.py            # Kafka producer
-│   │   └── iot_to_postgres.py           # Kafka consumer
-│   └── 📁 scripts/                       # Utility scripts
-│       └── create-topics.sh              # Kafka topic setup
+├── 📁 ingestion/                             # Data ingestion
+│   ├── 📁 api/                              # Weather API
+│   │   └── weatherstack_fetcher.py           # WeatherStack API client
+│   ├── 📁 iot/                              # IoT simulation
+│   │   ├── solar_producer.py                 # Kafka producer
+│   │   └── iot_to_postgres.py                # Kafka consumer
+│   └── 📁 scripts/                          # Utility scripts
+│       └── create-topics.sh                  # Kafka topic setup
 │
-├── 📁 postgres/                          # Database scripts
-│   ├── 📁 init/                          # Initialization
-│   │   └── init.sql                       # Database schema
-│   ├── 📁 bronze/                         # Bronze layer
+├── 📁 postgres/                              # Database scripts
+│   ├── 📁 init/                              # Initialization
+│   │   └── init.sql                           # Database schema
+│   ├── 📁 bronze/                             # Bronze layer
 │   │   ├── ddl_bronze.sql
 │   │   └── data_verify.sql
-│   ├── 📁 silver/                         # Silver layer
+│   ├── 📁 silver/                             # Silver layer
 │   │   ├── ddl_silver.sql
 │   │   ├── silver_load.sql
 │   │   └── data_verify.sql
-│   └── 📁 gold/                           # Gold layer
+│   └── 📁 gold/                               # Gold layer
 │       ├── ddl_gold.sql
 │       ├── gold_load_daily.sql
 │       ├── gold_load_hourly.sql
@@ -130,31 +130,31 @@ Energy-Trading-Pipeline/
 │       ├── gold_load_anomalies.sql
 │       └── data_verify.sql
 │
-├── 📁 orchestration/                      # Airflow orchestration
-│   ├── 📁 dags/                           # DAG definitions
+├── 📁 orchestration/                          # Airflow orchestration
+│   ├── 📁 dags/                               # DAG definitions
 │   │   ├── 01_ingestion_dag.py
 │   │   ├── 02_silver_transform_dag.py
 │   │   ├── 03_gold_load_dag.py
 │   │   ├── 04_anomaly_detection_dag.py
 │   │   └── 05_pipeline_monitor_dag.py
-│   └── 📁 scripts/                         # Utility scripts
+│   └── 📁 scripts/                            # Utility scripts
 │       ├── check_kafka.py
 │       ├── check_postgres.py
 │       └── alert.py
 │
-├── 📁 monitoring/                          # Monitoring & alerts
+├── 📁 monitoring/                             # Monitoring & alerts
 │   ├── health_checks.sql
 │   └── 📁 alerts/
 │       └── anomaly_alerts.py
 │
-├── 📁 docs/                                # Documentation
+├── 📁 docs/                                   # Documentation
 │   ├── architecture.md
 │   ├── data_dictionary.md
 │   └── setup_guide.md
 │
-├── 🐳 docker-compose.yml                    # Docker services
-├── 📝 requirements.txt                      # Python dependencies
-└── 📚 README.md                              # This file
+├── 🐳 docker-compose.yml                      # Docker services
+├── 📝 requirements.txt                        # Python dependencies
+└── 📚 README.md                                # This file
 ```
 
 ---
