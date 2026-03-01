@@ -41,10 +41,10 @@ SELECT
     last_record,
     ROUND(hours_ago, 2) as hours_since_last_record,
     CASE 
-        WHEN hours_ago < 1 THEN '✅ Real-time'
-        WHEN hours_ago < 6 THEN '⚠️ Slight delay'
-        WHEN hours_ago < 24 THEN '🔸 Batch mode'
-        ELSE '❌ Stale data'
+        WHEN hours_ago < 1 THEN 'Real-time'
+        WHEN hours_ago < 6 THEN 'Slight delay'
+        WHEN hours_ago < 24 THEN 'Batch mode'
+        ELSE 'Stale data'
     END as status
 FROM freshness
 ORDER BY hours_ago;
@@ -82,9 +82,9 @@ SELECT
     records_last_24h,
     ROUND(avg_records_per_hour, 0) as avg_per_hour,
     CASE 
-        WHEN records_last_24h = 0 THEN '❌ No data'
-        WHEN avg_records_per_hour < 100 THEN '⚠️ Low volume'
-        ELSE '✅ Normal'
+        WHEN records_last_24h = 0 THEN 'No data'
+        WHEN avg_records_per_hour < 100 THEN 'Low volume'
+        ELSE 'Normal'
     END as status
 FROM volume
 ORDER BY records_last_24h DESC;
@@ -111,9 +111,9 @@ SELECT
     ROUND(avg_production, 2) as avg_production_kw,
     last_seen,
     CASE 
-        WHEN hours_offline < 1 THEN '✅ Online'
-        WHEN hours_offline < 6 THEN '⚠️ Intermittent'
-        ELSE '❌ Offline'
+        WHEN hours_offline < 1 THEN 'Online'
+        WHEN hours_offline < 6 THEN 'Intermittent'
+        ELSE 'Offline'
     END as status
 FROM panel_stats
 ORDER BY 
@@ -274,10 +274,10 @@ SELECT
     quality_score,
     (freshness_score + anomaly_score + quality_score) as total_score,
     CASE 
-        WHEN (freshness_score + anomaly_score + quality_score) >= 90 THEN '✅ EXCELLENT'
-        WHEN (freshness_score + anomaly_score + quality_score) >= 70 THEN '👍 GOOD'
-        WHEN (freshness_score + anomaly_score + quality_score) >= 50 THEN '⚠️ FAIR'
-        ELSE '❌ CRITICAL'
+        WHEN (freshness_score + anomaly_score + quality_score) >= 90 THEN 'EXCELLENT'
+        WHEN (freshness_score + anomaly_score + quality_score) >= 70 THEN 'GOOD'
+        WHEN (freshness_score + anomaly_score + quality_score) >= 50 THEN 'FAIR'
+        ELSE 'CRITICAL'
     END as health_status
 FROM scores;
 
