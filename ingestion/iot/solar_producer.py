@@ -1,4 +1,5 @@
-# ingestion/iot/solar_producer.py
+# KAFKA PRODUCER
+
 import json
 import time
 import uuid
@@ -16,9 +17,9 @@ sys.path.append(str(project_root))
 # Now import works
 from config import userdata_config as cfg
 
-# Kafka configuration - FIXED VERSION
+# Kafka configuration
 KAFKA_CONF = {
-    'bootstrap.servers': 'localhost:9093',  # ONLY localhost
+    'bootstrap.servers': 'localhost:9093', 
     'enable.idempotence': False,  
 }
 
@@ -35,6 +36,9 @@ def delivery_report(err, msg):
         print(f"Message delivery failed: {err}")
     else:
         print(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+
+
+# IoT Data Generator
 
 def generate_solar_event(panel_id):
     """Generate realistic solar production data using config values"""
