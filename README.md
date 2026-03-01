@@ -66,29 +66,29 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
                     │                               │
                     └───────────────┬───────────────┘
                                     ▼
-                      ┌─────────────────────────┐
-                      │     Silver Layer        │
-                      │  (Cleaned & Enriched)   │
-                      │ - silver_weather        │
-                      │ - silver_solar          │
-                      └─────────────┬───────────┘
-                                    │
-                                    ▼
-                      ┌─────────────────────────┐
-                      │     Gold Layer          │
-                      │   (Aggregated Data)     │
-                      │ - gold_daily_panel      │
-                      │ - gold_hourly_system    │
-                      │ - gold_monthly_kpis     │
-                      │ - gold_anomalies        │
-                      └─────────────┬───────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    ▼                               ▼
-            ┌───────────────┐               ┌───────────────┐
-            │   Monitoring  │               │   Apache      │
-            │   & Alerts    │               │   Airflow     │
-            └───────────────┘               └───────────────┘
+                        ┌─────────────────────────┐
+                        │     Silver Layer        │
+                        │  (Cleaned & Enriched)   │
+                        │ - silver_weather        │
+                        │ - silver_solar          │
+                        └─────────────┬───────────┘
+                                      │
+                                      ▼
+                        ┌─────────────────────────┐
+                        │     Gold Layer          │
+                        │   (Aggregated Data)     │
+                        │ - gold_daily_panel      │
+                        │ - gold_hourly_system    │
+                        │ - gold_monthly_kpis     │
+                        │ - gold_anomalies        │
+                        └─────────────┬───────────┘
+                                      │
+                      ┌───────────────┴───────────────┐
+                      ▼                               ▼
+              ┌───────────────┐               ┌───────────────┐
+              │   Monitoring  │               │   Apache      │
+              │   & Alerts    │               │   Airflow     │
+              └───────────────┘               └───────────────┘
 ```
 
 ---
