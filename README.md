@@ -183,23 +183,23 @@ pip install -r requirements.txt
 # 3. Configure API key
 # Edit config/userdata_config.py and add your WeatherStack API key
 
-# 3. Configure Alerts - orchestration/scripts/alert
+# 4. Configure Alerts - orchestration/scripts/alert
 # Edit SMTP server, sender, password, recipients, Slack webhook.
 
-# 4. Start Docker services
+# 5. Start Docker services
 docker-compose up -d
 sleep 30  # Wait for services to initialize
 
-# 5. Create Kafka topics
+# 6. Create Kafka topics
 chmod +x ingestion/scripts/create-topics.sh
 ./ingestion/scripts/create-topics.sh
 
-# 6. Initialize database
+# 7. Initialize database
 docker cp postgres/init/init.sql postgres:/tmp/
 docker exec -it postgres psql -U airflow -d postgres -c "CREATE DATABASE solar_data;"
 docker exec -it postgres psql -U airflow -d solar_data -f /tmp/init.sql
 
-# 7. Start the pipeline
+# 8. Start the pipeline
 # Terminal 1: IoT Producer
 python ingestion/iot/solar_producer.py
 
