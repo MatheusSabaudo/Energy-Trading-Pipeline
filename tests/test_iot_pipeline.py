@@ -18,12 +18,12 @@ def test_kafka_connection():
         producer = Producer({'bootstrap.servers': 'localhost:9092'})
         # Try to get metadata
         metadata = producer.list_topics(timeout=5)
-        print(f"✅ Kafka Connection Successful")
+        print(f"Kafka Connection Successful")
         print(f"   Brokers: {len(metadata.brokers)}")
         print(f"   Topics: {list(metadata.topics.keys())}")
         return True
     except Exception as e:
-        print(f"❌ Kafka Connection Failed: {e}")
+        print(f"Kafka Connection Failed: {e}")
         return False
 
 def test_topic_exists():
@@ -34,18 +34,18 @@ def test_topic_exists():
         metadata = producer.list_topics(timeout=5)
         
         if 'solar-raw' in metadata.topics:
-            print(f"✅ Topic 'solar-raw' exists")
+            print(f"Topic 'solar-raw' exists")
             return True
         else:
-            print(f"❌ Topic 'solar-raw' does not exist")
+            print(f"Topic 'solar-raw' does not exist")
             return False
     except Exception as e:
-        print(f"❌ Error checking topic: {e}")
+        print(f"Error checking topic: {e}")
         return False
 
 def test_produce_message():
     """Test producing a test message"""
-    print("\n🔍 Testing Message Production...")
+    print("\nTesting Message Production...")
     try:
         producer = Producer({'bootstrap.servers': 'localhost:9092'})
         
@@ -58,15 +58,15 @@ def test_produce_message():
         
         producer.produce('solar-raw', value=json.dumps(test_message))
         producer.flush()
-        print(f"✅ Test message produced")
+        print(f"Test message produced")
         return True
     except Exception as e:
-        print(f"❌ Failed to produce message: {e}")
+        print(f"Failed to produce message: {e}")
         return False
 
 def test_table_exists():
     """Test if solar_panel_readings table exists"""
-    print("\n🔍 Testing Table Existence...")
+    print("\nTesting Table Existence...")
     try:
         conn = psycopg2.connect(**cfg.POSTGRES_CONFIG)
         cur = conn.cursor()
@@ -81,18 +81,18 @@ def test_table_exists():
         conn.close()
         
         if exists:
-            print(f"✅ Table 'solar_panel_readings' exists")
+            print(f"Table 'solar_panel_readings' exists")
             return True
         else:
-            print(f"❌ Table 'solar_panel_readings' does not exist")
+            print(f"Table 'solar_panel_readings' does not exist")
             return False
     except Exception as e:
-        print(f"❌ Error checking table: {e}")
+        print(f"Error checking table: {e}")
         return False
 
 def test_consume_message():
     """Test consuming a message (requires producer running)"""
-    print("\n🔍 Testing Message Consumption...")
+    print("\nTesting Message Consumption...")
     print("   (Make sure producer is running in another terminal)")
     
     # This test requires manual verification
@@ -124,12 +124,12 @@ if __name__ == "__main__":
     print("=" * 60)
     all_passed = True
     for name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
+        status = "PASS" if result else "FAIL"
         print(f"{status} - {name}")
         if not result:
             all_passed = False
     
     if all_passed:
-        print("\n✅ ALL TESTS PASSED - IoT pipeline ready!")
+        print("\nALL TESTS PASSED - IoT pipeline ready!")
     else:
-        print("\n❌ SOME TESTS FAILED - Check errors above")
+        print("\nSOME TESTS FAILED - Check errors above")
