@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_DB: solar_data
     ports:
       - "5432:5432"
     volumes:
@@ -46,7 +46,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/solar_data
     command: >
       bash -c "
         echo 'Waiting for postgres...' &&
@@ -64,7 +64,7 @@ services:
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/solar_data
       # Python path for imports
       PYTHONPATH: "/opt/airflow:/opt/airflow/orchestration:/opt/airflow/ingestion:/opt/airflow/config"
       # No MSSQL needed - just PostgreSQL and Kafka
@@ -129,3 +129,4 @@ volumes:
   postgres_data:
   pgadmin_data:
   kafka-data:
+Commit at 2026-03-01T18:33:57
