@@ -3,15 +3,6 @@
 -- Run this periodically to monitor system health
 
 -- ============================================================
--- HEALTH CHECK SUMMARY
--- ============================================================
-SELECT '==================================================' as line;
-SELECT 'SOLAR PIPELINE HEALTH CHECK' as title;
-SELECT '==================================================' as line;
-SELECT NOW() as check_time;
-SELECT '==================================================' as line;
-
--- ============================================================
 -- 1. DATA FRESHNESS CHECK
 -- ============================================================
 SELECT '\n1. DATA FRESHNESS' as section;
