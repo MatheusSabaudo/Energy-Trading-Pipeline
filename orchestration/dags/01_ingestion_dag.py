@@ -79,5 +79,5 @@ with DAG(
             WHERE timestamp > NOW() - INTERVAL '15 minutes';
         """
     )
-
+    # Task Dependencies
     [check_kafka, check_postgres] >> fetch_weather_api >> verify_ingestion
