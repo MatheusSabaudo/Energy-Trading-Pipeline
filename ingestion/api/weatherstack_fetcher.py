@@ -1,4 +1,5 @@
-# ingestion/api/weatherstack_fetcher.py
+# FETCH DATA FROM THE API
+
 import requests
 import psycopg2
 from datetime import datetime
@@ -10,7 +11,7 @@ from pathlib import Path
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from config import userdata_config as cfg
+from config import userdata_config as cfg  # import userdata config file
 
 # Configure logging
 logging.basicConfig(
