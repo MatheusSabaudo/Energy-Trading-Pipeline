@@ -32,7 +32,6 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
 
 ## 🏗️ Architecture
 
-```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        DATA SOURCES                                 │
 └─────────────────────────────────────────────────────────────────────┘
@@ -65,32 +64,35 @@ Comprehensive feasibility analysis for the installation of photovoltaic panels i
             └───────┬───────┘               └───────┬───────┘
                     │                               │
                     └───────────────┬───────────────┘
+                                    │
                                     ▼
-                        ┌─────────────────────────┐
-                        │     Silver Layer        │
-                        │  (Cleaned & Enriched)   │
-                        │ - silver_weather        │
-                        │ - silver_solar          │
-                        └─────────────┬───────────┘
-                                      │
-                                      ▼
-                        ┌─────────────────────────┐
-                        │     Gold Layer          │
-                        │   (Aggregated Data)     │
-                        │ - gold_daily_panel      │
-                        │ - gold_hourly_system    │
-                        │ - gold_monthly_kpis     │
-                        │ - gold_anomalies        │
-                        └─────────────┬───────────┘
-                                      │
-                      ┌───────────────┴───────────────┐
-                      ▼                               ▼
-              ┌───────────────┐               ┌───────────────┐
-              │   Monitoring  │               │   Apache      │
-              │   & Alerts    │               │   Airflow     │
-              └───────────────┘               └───────────────┘
-```
-
+                    ┌───────────────────────────────┐
+                    │        Apache Airflow         │
+                    │      (Orchestration Layer)    │
+                    │  ┌─────────────────────────┐  │
+                    │  │ 02_silver_transform_dag │  │
+                    │  │ 03_gold_load_dag        │  │
+                    │  │ 04_anomaly_detection_dag│  │
+                    │  └─────────────────────────┘  │
+                    └───────────────┬───────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+        ┌───────────────────┐             ┌─────────────────────┐
+        │   Silver Layer    │             │    Gold Layer       │
+        │  (Cleaned Data)   │             │ (Aggregated Data)   │
+        │ - silver_weather  │             │ - gold_daily_panel  │
+        │ - silver_solar    │             │ - gold_hourly_      │
+        └───────────────────┘             │   system            │
+                                          │ - gold_monthly_kpis │
+                                          │ - gold_anomalies    │
+                                          └─────────────────────┘
+                                                    │
+                                                    ▼
+                                          ┌───────────────────┐
+                                          │    Monitoring     │
+                                          │    & Alerts       │
+                                          └───────────────────┘
 ---
 
 ## 📁 Project Structure
