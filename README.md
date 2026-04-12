@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![Kafka](https://img.shields.io/badge/Apache%20Kafka-4.0.1-red)](https://kafka.apache.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
-[![Airflow](https://img.shields.io/badge/Airflow-2.7.1-green)](https://airflow.apache.org/)
+[![Airflow](https://img.shields.io/badge/Airflow-2.9.3-green)](https://airflow.apache.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
@@ -183,31 +183,19 @@ pip install -r requirements.txt
 # 3. Configure API key
 # Edit config/userdata_config.py and add your WeatherStack API key
 
-# 4. Configure Alerts - orchestration/scripts/alert
-# Edit SMTP server, sender, password, recipients, Slack webhook.
+# 4. Configure environment
+# Set WEATHERSTACK_ACCESS_KEY and optional alert credentials in your shell/.env
 
 # 5. Start Docker services
-docker-compose up -d
+docker compose up -d
 sleep 30  # Wait for services to initialize
 
-# 6. Create Kafka topics
+# 6. Optional: verify topic creation
 chmod +x ingestion/scripts/create-topics.sh
 ./ingestion/scripts/create-topics.sh
 
-# 7. Initialize database
-docker cp postgres/init/init.sql postgres:/tmp/
-docker exec -it postgres psql -U airflow -d postgres -c "CREATE DATABASE solar_data;"
-docker exec -it postgres psql -U airflow -d solar_data -f /tmp/init.sql
-
-# 8. Start the pipeline
-# Terminal 1: IoT Producer
-python ingestion/iot/solar_producer.py
-
-# Terminal 2: IoT Consumer
-python ingestion/iot/iot_to_postgres.py
-
-# Terminal 3: Weather Fetcher
-python ingestion/api/weatherstack_fetcher.py --city Turin --continuous
+# 7. Run tests
+pytest
 ```
 
 ---

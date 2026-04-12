@@ -3,16 +3,17 @@ services:
     image: postgres:15
     container_name: postgres
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: solar_data
+      POSTGRES_USER: ${POSTGRES_USER:-airflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow}
+      POSTGRES_DB: ${POSTGRES_DB:-solar_data}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
+      - ./postgres:/docker-entrypoint-initdb.d/postgres
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-airflow}"]
       interval: 5s
       retries: 5
 
@@ -20,8 +21,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@msr.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@msr.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
     ports:
       - "5050:80"
     depends_on:
@@ -40,23 +41,23 @@ services:
         condition: service_healthy
 
   airflow-init:
-    image: apache/airflow:2.7.1
+    image: apache/airflow:2.9.3
     container_name: airflow-init
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/solar_data
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${POSTGRES_DB:-solar_data}
     command: >
       bash -c "
         echo 'Waiting for postgres...' &&
         sleep 5 &&
-        airflow db init &&
-        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@msr.com
+        airflow db migrate &&
+        airflow users create --username ${AIRFLOW_ADMIN_USERNAME:-admin} --password ${AIRFLOW_ADMIN_PASSWORD:-admin} --firstname Admin --lastname User --role Admin --email ${AIRFLOW_ADMIN_EMAIL:-admin@msr.com}
       "
 
   airflow:
-    image: apache/airflow:2.7.1
+    image: apache/airflow:2.9.3
     container_name: airflow
     depends_on:
       airflow-init:
@@ -64,11 +65,18 @@ services:
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/solar_data
-      # Python path for imports
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${POSTGRES_DB:-solar_data}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-solar_data}
+      POSTGRES_USER: ${POSTGRES_USER:-airflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: solar-raw
+      WEATHERSTACK_ACCESS_KEY: ${WEATHERSTACK_ACCESS_KEY:-}
+      DOCKER_CONTAINER: "true"
       PYTHONPATH: "/opt/airflow:/opt/airflow/orchestration:/opt/airflow/ingestion:/opt/airflow/config"
-      # No MSSQL needed - just PostgreSQL and Kafka
-      _PIP_ADDITIONAL_REQUIREMENTS: "psycopg2-binary confluent-kafka apache-airflow-providers-postgres"
+      _PIP_ADDITIONAL_REQUIREMENTS: "psycopg2-binary confluent-kafka apache-airflow-providers-postgres requests"
     volumes:
       - ./orchestration/dags:/opt/airflow/dags
       - ./orchestration:/opt/airflow/orchestration
@@ -78,6 +86,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8080:8080"
+    restart: unless-stopped
     command: >
       bash -c "
         airflow webserver --port 8080 &
@@ -123,6 +132,77 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+    restart: unless-stopped
+
+  weather-fetcher:
+    image: python:3.11-slim
+    container_name: weather-fetcher
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-solar_data}
+      POSTGRES_USER: ${POSTGRES_USER:-airflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow}
+      WEATHERSTACK_ACCESS_KEY: ${WEATHERSTACK_ACCESS_KEY:-}
+      PYTHONPATH: /app
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "
+        pip install --no-cache-dir -r requirements.txt &&
+        python ingestion/api/weatherstack_fetcher.py --city Turin --continuous --interval 15
+      "
+    restart: unless-stopped
+
+  iot-producer:
+    image: python:3.11-slim
+    container_name: iot-producer
+    working_dir: /app
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: solar-raw
+      PYTHONPATH: /app
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "
+        pip install --no-cache-dir -r requirements.txt &&
+        python ingestion/iot/solar_producer.py
+      "
+    restart: unless-stopped
+
+  iot-consumer:
+    image: python:3.11-slim
+    container_name: iot-consumer
+    working_dir: /app
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-solar_data}
+      POSTGRES_USER: ${POSTGRES_USER:-airflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: solar-raw
+      PYTHONPATH: /app
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "
+        pip install --no-cache-dir -r requirements.txt &&
+        python ingestion/iot/iot_to_postgres.py
+      "
     restart: unless-stopped
 
 volumes:

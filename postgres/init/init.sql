@@ -1,14 +1,6 @@
 -- postgres/init/init.sql
 -- Initialize PostgreSQL database with both API and IoT tables
 
--- Create database if not exists (run as superuser)
--- CREATE DATABASE solar_data;
-
--- \c solar_data;
-
--- ============================================================
--- TABLE 1: Weather Data from API
--- ============================================================
 CREATE TABLE IF NOT EXISTS weather_data (
     id SERIAL PRIMARY KEY,
     city VARCHAR(100),
@@ -28,14 +20,10 @@ CREATE TABLE IF NOT EXISTS weather_data (
     ingestion_timestamp TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create indexes for weather data
-CREATE INDEX idx_weather_timestamp ON weather_data(timestamp);
-CREATE INDEX idx_weather_city ON weather_data(city);
-CREATE INDEX idx_weather_observation ON weather_data(observation_time);
+CREATE INDEX IF NOT EXISTS idx_weather_timestamp ON weather_data(timestamp);
+CREATE INDEX IF NOT EXISTS idx_weather_city ON weather_data(city);
+CREATE INDEX IF NOT EXISTS idx_weather_observation ON weather_data(observation_time);
 
--- ============================================================
--- TABLE 2: IoT Solar Panel Data
--- ============================================================
 CREATE TABLE IF NOT EXISTS solar_panel_readings (
     id SERIAL PRIMARY KEY,
     event_id UUID UNIQUE,
@@ -52,16 +40,12 @@ CREATE TABLE IF NOT EXISTS solar_panel_readings (
     ingestion_timestamp TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create indexes for IoT data
-CREATE INDEX idx_iot_timestamp ON solar_panel_readings(timestamp);
-CREATE INDEX idx_iot_panel_id ON solar_panel_readings(panel_id);
-CREATE INDEX idx_iot_event_id ON solar_panel_readings(event_id);
+CREATE INDEX IF NOT EXISTS idx_iot_timestamp ON solar_panel_readings(timestamp);
+CREATE INDEX IF NOT EXISTS idx_iot_panel_id ON solar_panel_readings(panel_id);
+CREATE INDEX IF NOT EXISTS idx_iot_event_id ON solar_panel_readings(event_id);
 
--- ============================================================
--- Create views for combined analysis (optional)
--- ============================================================
 CREATE OR REPLACE VIEW combined_solar_weather AS
-SELECT 
+SELECT
     s.timestamp,
     s.panel_id,
     s.production_kw,
@@ -75,10 +59,11 @@ FROM solar_panel_readings s
 LEFT JOIN weather_data w ON DATE(s.timestamp) = DATE(w.timestamp)
     AND EXTRACT(HOUR FROM s.timestamp) = EXTRACT(HOUR FROM w.timestamp);
 
--- Grant permissions (adjust as needed)
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO airflow;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO airflow;
 
--- Verify tables created
+\i /docker-entrypoint-initdb.d/postgres/silver/ddl_silver.sql
+\i /docker-entrypoint-initdb.d/postgres/gold/ddl_gold.sql
+
 SELECT 'Tables created successfully' as message;
 SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';

@@ -228,7 +228,6 @@ SELECT '\n9. OVERALL HEALTH SCORE' as section;
 SELECT '==================================================' as line;
 
 WITH scores AS (
-    -- Freshness score (30 points)
     SELECT 
         CASE 
             WHEN (SELECT MAX(timestamp) FROM solar_panel_readings) > NOW() - INTERVAL '1 hour' THEN 30
@@ -236,28 +235,20 @@ WITH scores AS (
             WHEN (SELECT MAX(timestamp) FROM solar_panel_readings) > NOW() - INTERVAL '24 hours' THEN 10
             ELSE 0
         END as freshness_score,
-    
-    -- Anomaly score (40 points)
-    SELECT 
         GREATEST(0, 40 - (
-            SELECT COUNT(*) * 5 FROM gold_anomalies 
+            SELECT COALESCE(COUNT(*), 0) * 5 FROM gold_anomalies 
             WHERE resolution_status = 'Open' AND severity = 'Critical'
         ) - (
-            SELECT COUNT(*) * 2 FROM gold_anomalies 
+            SELECT COALESCE(COUNT(*), 0) * 2 FROM gold_anomalies 
             WHERE resolution_status = 'Open' AND severity = 'Warning'
         )) as anomaly_score,
-    
-    -- Data quality score (30 points)
-    SELECT 
         CASE 
-            WHEN AVG(data_quality_pct) > 98 THEN 30
-            WHEN AVG(data_quality_pct) > 95 THEN 25
-            WHEN AVG(data_quality_pct) > 90 THEN 20
-            WHEN AVG(data_quality_pct) > 80 THEN 10
+            WHEN COALESCE((SELECT AVG(data_quality_pct) FROM gold_daily_panel WHERE date >= CURRENT_DATE - 7), 0) > 98 THEN 30
+            WHEN COALESCE((SELECT AVG(data_quality_pct) FROM gold_daily_panel WHERE date >= CURRENT_DATE - 7), 0) > 95 THEN 25
+            WHEN COALESCE((SELECT AVG(data_quality_pct) FROM gold_daily_panel WHERE date >= CURRENT_DATE - 7), 0) > 90 THEN 20
+            WHEN COALESCE((SELECT AVG(data_quality_pct) FROM gold_daily_panel WHERE date >= CURRENT_DATE - 7), 0) > 80 THEN 10
             ELSE 0
         END as quality_score
-    FROM gold_daily_panel
-    WHERE date >= CURRENT_DATE - 7
 )
 SELECT 
     freshness_score,
