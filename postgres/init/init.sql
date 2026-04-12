@@ -4,7 +4,7 @@
 -- Create database if not exists (run as superuser)
 -- CREATE DATABASE solar_data;
 
-\c solar_data;
+-- \c solar_data;
 
 -- ============================================================
 -- TABLE 1: Weather Data from API
