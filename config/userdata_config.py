@@ -197,3 +197,30 @@ SEASONAL_FACTORS = {
     'November': 0.8,
     'December': 0.6,
 }
+
+LOCATION_PARAMS = {
+    'city': 'Turin',
+    'country': 'Italy',
+    'latitude': 45.0703,
+    'longitude': 7.6869,
+    'timezone': 'Europe/Rome',
+    'elevation_m': 239,
+}
+
+SIMULATION_PARAMS = {
+    'analysis_year': 2026,
+    'seed': 2602,
+    'panel_tilt_deg': 35,
+    'panel_azimuth_deg': 0,
+    'albedo': 0.20,
+    'nominal_operating_cell_temp_c': 45.0,
+    'site_calibration_factor': 0.84,
+}
+
+LOAD_PROFILE_PARAMS = {
+    'base_load_kw': 0.18,
+    'morning_peak_kw': 0.55,
+    'evening_peak_kw': 0.85,
+    'winter_bias': 0.10,
+    'weekend_bias': 0.06,
+}
