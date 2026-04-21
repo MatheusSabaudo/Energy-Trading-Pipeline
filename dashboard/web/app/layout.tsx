@@ -2,9 +2,9 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Solar Decision Platform | Data Engineering Project Walkthrough",
+  title: "Solar Energy Data Pipeline | Project Portfolio",
   description:
-    "An end-to-end solar decision platform and data engineering project walkthrough with real data context, simulation logic, and a full pipeline architecture."
+    "A portfolio website for an end-to-end solar energy data pipeline, structured for data engineering, cloud engineering, and AWS architecture interview walkthroughs."
 };
 
 export default function RootLayout({

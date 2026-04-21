@@ -12,7 +12,245 @@ import {
   type ScenarioMetrics,
   type SensitivityRow
 } from "../lib/site-data";
-import DecisionWorkbench from "../components/decision-workbench";
+
+const ARCHITECTURE_DIAGRAM = String.raw`
+┌─────────────────────────────────────────────────────────────────────┐
+│                        DATA SOURCES                                 │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                ┌─────────────────┴─────────────────┐
+                ▼                                   ▼
+  ┌───────────────────────┐             ┌───────────────────────┐
+  │   WEATHERSTACK API    │             │   IOT SIMULATOR       │
+  │   (weatherstack.com)  │             │   (Kafka Producer)    │
+  └───────────┬───────────┘             └───────────┬───────────┘
+              │                                     │
+              ▼                                     ▼
+      ┌───────────────┐                     ┌───────────────┐
+      │  Python Fetch │                     │    Kafka      │
+      │   (hourly)    │                     │  (solar-raw)  │
+      └───────┬───────┘                     └───────┬───────┘
+              │                                     │
+              └────────────────────┬────────────────┘
+                                   ▼
+                      ┌─────────────────────────┐
+                      │        PostgreSQL       │
+                      │       (solar_data)      │
+                      └─────────────┬───────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+            ┌───────────────┐               ┌───────────────┐
+            │ weather_data  │               │  solar_panel  │
+            │   (Bronze)    │               │    readings   │
+            └───────┬───────┘               └───────┬───────┘
+                    │                               │
+                    └───────────────┬───────────────┘
+                                    │
+                                    ▼
+                    ┌───────────────────────────────┐
+                    │        Apache Airflow         │
+                    │      (Orchestration Layer)    │
+                    │  ┌─────────────────────────┐  │
+                    │  │ 02_silver_transform_dag │  │
+                    │  │ 03_gold_load_dag        │  │
+                    │  │ 04_anomaly_detection_dag│  │
+                    │  └─────────────────────────┘  │
+                    └───────────────┬───────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+        ┌───────────────────┐             ┌─────────────────────┐
+        │   Silver Layer    │             │    Gold Layer       │
+        │  (Cleaned Data)   │             │ (Aggregated Data)   │
+        │ - silver_weather  │             │ - gold_daily_panel  │
+        │ - silver_solar    │             │ - gold_hourly_      │
+        └───────────────────┘             │   system            │
+                                          │ - gold_monthly_kpis │
+                                          │ - gold_anomalies    │
+                                          └─────────────────────┘
+                                                      │
+                                                      ▼
+                                            ┌───────────────────┐
+                                            │    Monitoring     │
+                                            │    & Alerts       │
+                                            └───────────────────┘
+`;
+
+const PROJECT_TREE = String.raw`
+Energy-Trading-Pipeline/
+│
+├── config/
+│   └── userdata_config.py
+├── ingestion/
+│   ├── api/
+│   │   └── weatherstack_fetcher.py
+│   ├── iot/
+│   │   ├── solar_producer.py
+│   │   └── iot_to_postgres.py
+│   └── scripts/
+│       └── create-topics.sh
+├── postgres/
+│   ├── init/
+│   │   └── init.sql
+│   ├── bronze/
+│   ├── silver/
+│   └── gold/
+├── orchestration/
+│   ├── dags/
+│   │   ├── 01_ingestion_dag.py
+│   │   ├── 02_silver_transform_dag.py
+│   │   ├── 03_gold_load_dag.py
+│   │   ├── 04_anomaly_detection_dag.py
+│   │   └── 05_pipeline_monitor_dag.py
+│   └── scripts/
+├── monitoring/
+├── solar_analysis_data/
+│   ├── turin_model.py
+│   ├── reliable_analysis.py
+│   └── notebooks_output/
+├── dashboard/
+│   ├── powerbi/
+│   └── web/
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
+`;
+
+const FRAMEWORKS = [
+  {
+    title: "Python",
+    role: "Core application logic",
+    copy:
+      "Python drives the WeatherStack ingestion, the IoT simulator, the reliable Turin solar model, and the economic analysis pipeline.",
+    bullets: [
+      "API fetchers and streaming producers",
+      "Reproducible simulation and analysis scripts",
+      "Project-wide configuration and tests"
+    ]
+  },
+  {
+    title: "Apache Kafka",
+    role: "Streaming boundary",
+    copy:
+      "Kafka separates event generation from persistence, which makes the ingestion story feel like a real streaming system instead of a direct script-to-database load.",
+    bullets: [
+      "Solar panel events published by the simulator",
+      "Consumer persists raw records into bronze tables",
+      "Useful for explaining decoupling in interviews"
+    ]
+  },
+  {
+    title: "PostgreSQL",
+    role: "Operational and analytical storage",
+    copy:
+      "PostgreSQL holds the medallion layers and gives the project a concrete data-modeling backbone through raw, cleaned, and aggregated tables.",
+    bullets: [
+      "Bronze raw landing tables",
+      "Silver validation and enrichment layer",
+      "Gold KPI, hourly, daily, and anomaly outputs"
+    ]
+  },
+  {
+    title: "Apache Airflow",
+    role: "Orchestration",
+    copy:
+      "Airflow turns the scripts and SQL into a scheduled pipeline with explicit stages, DAG dependencies, and monitoring-friendly execution boundaries.",
+    bullets: [
+      "Ingestion orchestration",
+      "Silver and gold transformations",
+      "Anomaly detection and pipeline monitoring"
+    ]
+  },
+  {
+    title: "Docker Compose",
+    role: "Local platform environment",
+    copy:
+      "Docker Compose makes the project reproducible by packaging Kafka, PostgreSQL, Airflow, and supporting services into a single runnable environment.",
+    bullets: [
+      "Multi-service local stack",
+      "Consistent environment for demos",
+      "Clear project setup story"
+    ]
+  },
+  {
+    title: "Next.js + Vercel",
+    role: "Portfolio presentation layer",
+    copy:
+      "The website is the presentation surface of the project: it explains architecture, shows outputs, and turns the repository into something easy to walk through live.",
+    bullets: [
+      "Static project portfolio site",
+      "Reads generated JSON outputs",
+      "Structured for interview walkthroughs"
+    ]
+  }
+];
+
+const PORTFOLIO_SECTIONS = [
+  {
+    title: "What the project does",
+    copy:
+      "This repository combines streaming ingestion, medallion modeling, orchestration, monitoring, and a solar feasibility analysis for Turin inside one end-to-end system."
+  },
+  {
+    title: "Why this site exists",
+    copy:
+      "The website is not meant to be a product demo for external clients anymore. It is meant to explain the repository clearly during interviews: architecture, framework choices, data flow, and outputs."
+  },
+  {
+    title: "What can be explained live",
+    copy:
+      "The site is structured to support a walkthrough of the pipeline, the solar simulation, the reliability fixes, and the way raw data becomes something decision-ready."
+  }
+];
+
+const ENGINEERING_NOTES = [
+  "The original notebook flow was analyzed and replaced with a reproducible Python pipeline.",
+  "Turin weather and solar output were turned into a calibrated yearly simulation instead of relying on sparse notebook-state results.",
+  "The website reads generated artifacts so the portfolio surface stays tied to real project outputs."
+];
+
+const ROLE_LENSES = [
+  {
+    title: "Data Engineer",
+    points: [
+      "Streaming ingestion with Kafka and consumer persistence into bronze tables",
+      "Medallion architecture across bronze, silver, and gold layers",
+      "Airflow DAG orchestration, SQL transformations, and data quality logic"
+    ]
+  },
+  {
+    title: "Cloud Engineer",
+    points: [
+      "The current local architecture can be re-designed as an AWS-based target architecture using managed services",
+      "This creates a strong cloud solutions narrative around service selection, reliability, observability, and scalability",
+      "The portfolio can be used to explain how the same project would be implemented in a real AWS environment"
+    ]
+  }
+];
+
+const AWS_MAPPING = [
+  {
+    area: "Streaming and ingestion",
+    services: "Amazon MSK / Kinesis, Lambda or ECS, API Gateway",
+    explanation: "The current Kafka and Python ingestion story can be translated into a managed AWS ingestion layer."
+  },
+  {
+    area: "Storage and modeling",
+    services: "Amazon RDS PostgreSQL, Amazon S3, AWS Glue Data Catalog",
+    explanation: "The bronze, silver, and gold pattern can be re-explained as a managed storage and catalog architecture."
+  },
+  {
+    area: "Orchestration and scheduling",
+    services: "Amazon MWAA, EventBridge, Step Functions",
+    explanation: "The Airflow DAG structure creates a natural bridge to AWS-native orchestration discussions."
+  },
+  {
+    area: "Monitoring and serving",
+    services: "CloudWatch, SNS, QuickSight, Vercel or Amplify",
+    explanation: "Monitoring, alerting, and presentation can be explained as an end-to-end cloud operations layer."
+  }
+];
 
 function SectionHeader({
   eyebrow,
@@ -50,36 +288,19 @@ function SummaryMetric({
   );
 }
 
-function HeroPreview({
-  current,
-  optimal,
-  verdict,
-  score
+function PortfolioPreview({
+  dagSteps,
+  stackItems,
+  dataProducts,
+  simulationYear,
+  location
 }: {
-  current: ScenarioMetrics;
-  optimal: ScenarioMetrics;
-  verdict: string;
-  score: number;
+  dagSteps: string[];
+  stackItems: string[];
+  dataProducts: string[];
+  simulationYear: number;
+  location: string;
 }) {
-  const total = current.year_one.annual_load_kwh;
-  const coverage = [
-    {
-      label: "Direct solar usage",
-      value: current.year_one.annual_self_consumed_kwh,
-      tone: "tone-amber"
-    },
-    {
-      label: "Grid import",
-      value: current.year_one.annual_imported_kwh,
-      tone: "tone-ink"
-    },
-    {
-      label: "Grid export",
-      value: current.year_one.annual_exported_kwh,
-      tone: "tone-teal"
-    }
-  ];
-
   return (
     <aside className="hero-preview">
       <div className="preview-window">
@@ -89,55 +310,68 @@ function HeroPreview({
             <i />
             <i />
           </div>
-          <span>executive-dashboard.live</span>
+          <span>project-walkthrough.vercel.app</span>
         </div>
 
         <div className="preview-body">
           <div className="preview-overview">
             <div>
-              <span className="eyebrow">Executive readout</span>
-              <h3>{verdict}</h3>
-              <p>Portfolio-grade view of feasibility, sizing, and pipeline operations.</p>
+              <span className="eyebrow">Project snapshot</span>
+              <h3>Architecture, simulation, and serving</h3>
+              <p>One repository used to explain ingestion, modeling, orchestration, and analytics outputs.</p>
             </div>
             <div className="score-chip">
-              <span>Score</span>
-              <strong>{score}/100</strong>
+              <span>Location</span>
+              <strong>{location}</strong>
             </div>
           </div>
 
           <div className="preview-grid">
             <div className="mini-card">
-              <span>Current system</span>
-              <strong>{formatDecimal(current.panel_size_kw, 1)} kWp</strong>
-              <p>{current.payback_display} payback</p>
+              <span>Frameworks</span>
+              <strong>{stackItems.length}</strong>
+              <p>Python, Kafka, PostgreSQL, Airflow, Docker, Next.js</p>
             </div>
             <div className="mini-card">
-              <span>Best tested size</span>
-              <strong>{formatDecimal(optimal.panel_size_kw, 1)} kWp</strong>
-              <p>{formatCurrency(optimal.npv_25_years_euro)} NPV</p>
+              <span>DAG chain</span>
+              <strong>{dagSteps.length} stages</strong>
+              <p>From ingestion through monitoring</p>
             </div>
           </div>
 
           <div className="balance-preview">
             <div className="balance-head">
-              <span>Annual energy balance</span>
-              <strong>{formatCompactNumber(current.year_one.annual_production_kwh)} kWh</strong>
+              <span>Repository narrative</span>
+              <strong>{simulationYear} simulation outputs</strong>
             </div>
             <div className="balance-list">
-              {coverage.map((item) => (
-                <div key={item.label} className="balance-item">
-                  <div className="balance-meta">
-                    <span>{item.label}</span>
-                    <strong>{formatCompactNumber(item.value)} kWh</strong>
-                  </div>
-                  <div className="balance-track">
-                    <div
-                      className={`balance-fill ${item.tone}`}
-                      style={{ width: `${(item.value / total) * 100}%` }}
-                    />
-                  </div>
+              <div className="balance-item">
+                <div className="balance-meta">
+                  <span>Medallion products</span>
+                  <strong>{dataProducts.length}</strong>
                 </div>
-              ))}
+                <div className="balance-track">
+                  <div className="balance-fill tone-amber" style={{ width: "100%" }} />
+                </div>
+              </div>
+              <div className="balance-item">
+                <div className="balance-meta">
+                  <span>Analysis layer</span>
+                  <strong>Reliable Turin model</strong>
+                </div>
+                <div className="balance-track">
+                  <div className="balance-fill tone-teal" style={{ width: "82%" }} />
+                </div>
+              </div>
+              <div className="balance-item">
+                <div className="balance-meta">
+                  <span>Presentation layer</span>
+                  <strong>Next.js portfolio site</strong>
+                </div>
+                <div className="balance-track">
+                  <div className="balance-fill tone-ink" style={{ width: "74%" }} />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -199,10 +433,10 @@ function SeasonalityChart({ data }: { data: MonthlySummary[] }) {
     <article className="panel-card">
       <div className="panel-head">
         <div>
-          <span className="eyebrow">Seasonality profile</span>
+          <span className="eyebrow">Solar analysis</span>
           <h3>Production versus household demand across the year</h3>
         </div>
-        <p>Warm months dominate output, but winter still matters for economic resilience and import behavior.</p>
+        <p>This chart is one of the clearest ways to explain how the Turin simulation behaves season by season.</p>
       </div>
 
       <div className="season-chart">
@@ -278,7 +512,7 @@ function CashFlowChart({
           <span className="eyebrow">Economic trajectory</span>
           <h3>Cumulative cash flow over 25 years</h3>
         </div>
-        <p>The goal is not just to produce energy, but to understand how capital efficiency evolves over time.</p>
+        <p>This output makes the financial story concrete and easy to explain visually during a walkthrough.</p>
       </div>
 
       <svg viewBox={`0 0 ${width} ${height}`} className="cashflow-chart" role="img" aria-label="Cash flow comparison">
@@ -314,8 +548,8 @@ function RecommendationCard({
     <article className="panel-card recommendation-card">
       <div className="panel-head">
         <div>
-          <span className="eyebrow">Recommendation logic</span>
-          <h3>Why the answer is positive, but not blindly aggressive</h3>
+          <span className="eyebrow">What the analysis proves</span>
+          <h3>From raw data to something financially explainable</h3>
         </div>
       </div>
 
@@ -361,10 +595,10 @@ function SensitivityTable({ rows }: { rows: SensitivityRow[] }) {
     <article className="panel-card table-card">
       <div className="panel-head">
         <div>
-          <span className="eyebrow">Sensitivity analysis</span>
-          <h3>Sizing trade-offs at a glance</h3>
+          <span className="eyebrow">Sizing sweep</span>
+          <h3>How the solar model behaves across tested system sizes</h3>
         </div>
-        <p>Professional decision support means showing the trade space, not just highlighting a single answer.</p>
+        <p>The portfolio site keeps one analytical table on the page so the project can be explained with real outputs.</p>
       </div>
 
       <div className="table-wrap">
@@ -399,37 +633,31 @@ function SensitivityTable({ rows }: { rows: SensitivityRow[] }) {
   );
 }
 
-function PipelineSection() {
-  const stages = getPipelineStages();
+function ArchitectureSection() {
   const dagSteps = getDagSteps();
-  const stackItems = getStackItems();
+  const stages = getPipelineStages();
   const dataProducts = getDataProducts();
 
   return (
-    <section id="pipeline" className="content-section">
+    <section id="architecture" className="content-section">
       <SectionHeader
-        eyebrow="Pipeline narrative"
-        title="A polished front-end, backed by a real data engineering backbone"
-        description="This website is intentionally structured like a technical product story: source systems, orchestration, medallion layers, and analytical serving all connect to the solar decision surface."
+        eyebrow="Architecture"
+        title="The root README diagram is part of the portfolio story"
+        description="The homepage now uses the architecture diagram from the repository itself so the project explanation stays grounded in the actual structure of the codebase."
       />
 
-      <div className="pipeline-layout">
-        <div className="pipeline-timeline">
-          {stages.map((stage, index) => (
-            <article key={stage.title} className="timeline-card">
-              <div className="timeline-top">
-                <span className="timeline-index">0{index + 1}</span>
-                <h3>{stage.title}</h3>
-              </div>
-              <p>{stage.summary}</p>
-              <ul>
-                {stage.details.map((detail) => (
-                  <li key={detail}>{detail}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
+      <div className="architecture-layout">
+        <article className="panel-card code-panel">
+          <div className="panel-head">
+            <div>
+              <span className="eyebrow">README diagram</span>
+              <h3>System flow from sources to gold outputs</h3>
+            </div>
+          </div>
+          <pre className="ascii-diagram">
+            <code>{ARCHITECTURE_DIAGRAM}</code>
+          </pre>
+        </article>
 
         <div className="pipeline-sidebar">
           <article className="side-card">
@@ -442,18 +670,18 @@ function PipelineSection() {
           </article>
 
           <article className="side-card">
-            <span className="eyebrow">Stack</span>
-            <div className="tag-list">
-              {stackItems.map((item) => (
-                <span key={item} className="tag">
-                  {item}
-                </span>
+            <span className="eyebrow">Pipeline chapters</span>
+            <ul>
+              {stages.map((stage) => (
+                <li key={stage.title}>
+                  <strong>{stage.title}:</strong> {stage.summary}
+                </li>
               ))}
-            </div>
+            </ul>
           </article>
 
           <article className="side-card">
-            <span className="eyebrow">Data products</span>
+            <span className="eyebrow">Gold-facing products</span>
             <div className="tag-list muted">
               {dataProducts.map((item) => (
                 <span key={item} className="tag muted">
@@ -468,56 +696,24 @@ function PipelineSection() {
   );
 }
 
-function ProjectStorySection() {
-  const pillars = [
-    {
-      title: "Project scope",
-      copy:
-        "This project brings together ingestion, streaming, storage, orchestration, simulation, analytics, and web delivery inside one cohesive system.",
-      bullets: [
-        "Combines modern frameworks with an end-to-end data workflow.",
-        "Moves beyond isolated exercises into a structured system with realistic trade-offs.",
-        "Uses real weather context plus a calibrated Turin solar simulation instead of toy placeholder data."
-      ]
-    },
-    {
-      title: "Technical depth",
-      copy:
-        "The most valuable outcome is not only the final interface, but also the technical depth behind it: debugging, iteration, reliability, and reproducibility across the stack.",
-      bullets: [
-        "Models data from source to bronze, silver, and gold layers.",
-        "Builds reproducible analysis instead of relying on notebook state.",
-        "Connects backend data engineering work to a polished product surface."
-      ]
-    },
-    {
-      title: "Walkthrough topics",
-      copy:
-        "The website is structured to support a clear walkthrough of the architectural decisions, the simulation logic, the recommendation trade-offs, and the practical engineering lessons in the project.",
-      bullets: [
-        "Kafka, PostgreSQL, Airflow, data quality, and medallion architecture.",
-        "Solar modeling assumptions, economics, sensitivity analysis, and decision logic.",
-        "Next.js/Vercel delivery, UX thinking, and how technical output is framed for users."
-      ]
-    }
-  ];
-
+function FrameworkSection() {
   return (
-    <section id="project-story" className="content-section">
+    <section id="frameworks" className="content-section">
       <SectionHeader
-        eyebrow="Project overview"
-        title="A complete project walkthrough, not just a dashboard screen"
-        description="The site is designed to present the project clearly: real data, multiple frameworks, simulation logic, pipeline architecture, and a user-facing decision layer in one coherent flow."
+        eyebrow="Frameworks"
+        title="Each framework has a clear job in the project"
+        description="The site now explains the stack as implementation choices, not just a list of technologies. That makes the walkthrough much stronger during interviews."
       />
 
-      <div className="story-grid">
-        {pillars.map((pillar) => (
-          <article key={pillar.title} className="story-card">
-            <span className="eyebrow">{pillar.title}</span>
-            <p>{pillar.copy}</p>
+      <div className="framework-grid">
+        {FRAMEWORKS.map((item) => (
+          <article key={item.title} className="framework-card">
+            <span className="eyebrow">{item.role}</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
             <ul>
-              {pillar.bullets.map((item) => (
-                <li key={item}>{item}</li>
+              {item.bullets.map((bullet) => (
+                <li key={bullet}>{bullet}</li>
               ))}
             </ul>
           </article>
@@ -527,31 +723,200 @@ function ProjectStorySection() {
   );
 }
 
+function RoleSection() {
+  return (
+    <section id="roles" className="content-section">
+      <SectionHeader
+        eyebrow="Interview angles"
+        title="One project, two role narratives"
+        description="The same repository can be presented in two different ways: as the current data engineering implementation, and as the cloud-engineering version of the same system redesigned for AWS."
+      />
+
+      <div className="framework-grid">
+        {ROLE_LENSES.map((role) => (
+          <article key={role.title} className="framework-card">
+            <span className="eyebrow">Role lens</span>
+            <h3>{role.title}</h3>
+            <ul>
+              {role.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AwsSection() {
+  return (
+    <section id="aws" className="content-section">
+      <SectionHeader
+        eyebrow="AWS target architecture"
+        title="This section is the cloud-engineering version of the same project"
+        description="The current repository uses the local stack that was built for the actual implementation. This section is reserved for the AWS version, where the same architecture is reimagined with managed AWS services."
+      />
+
+      <div className="architecture-layout">
+        <article className="panel-card code-panel aws-placeholder">
+          <div className="panel-head">
+            <div>
+              <span className="eyebrow">AWS architecture diagram</span>
+              <h3>Reserved space for the AWS implementation diagram</h3>
+            </div>
+          </div>
+          <div className="aws-placeholder-box">
+            <strong>Place the AWS diagram here</strong>
+            <p>
+              This section is designed for the AWS target-state architecture of the project, so the same portfolio can
+              support cloud engineering interviews using the managed-services version of the system.
+            </p>
+          </div>
+        </article>
+
+        <div className="pipeline-sidebar">
+          <article className="side-card">
+            <span className="eyebrow">How to talk through it</span>
+            <ul>
+              <li>Start from the current working implementation and explain which frameworks would be replaced by AWS services.</li>
+              <li>Use the same pipeline stages to discuss scalability, resilience, security, observability, and service boundaries.</li>
+              <li>Position the AWS diagram as the cloud implementation of the same project, not as a separate idea.</li>
+            </ul>
+          </article>
+
+          <article className="side-card">
+            <span className="eyebrow">AWS service mapping</span>
+            <div className="aws-map">
+              {AWS_MAPPING.map((item) => (
+                <div key={item.area} className="aws-map-card">
+                  <strong>{item.area}</strong>
+                  <span>{item.services}</span>
+                  <p>{item.explanation}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StructureSection() {
+  return (
+    <section id="structure" className="content-section">
+      <SectionHeader
+        eyebrow="Repository structure"
+        title="The website also explains how the repository is organized"
+        description="Showing the project structure directly on the site makes it much easier to walk through where ingestion, SQL, orchestration, analysis, and front-end work live."
+      />
+
+      <div className="structure-layout">
+        <article className="panel-card code-panel">
+          <div className="panel-head">
+            <div>
+              <span className="eyebrow">Project tree</span>
+              <h3>Top-level repository map</h3>
+            </div>
+          </div>
+          <pre className="ascii-diagram">
+            <code>{PROJECT_TREE}</code>
+          </pre>
+        </article>
+
+        <div className="story-grid">
+          {PORTFOLIO_SECTIONS.map((section) => (
+            <article key={section.title} className="story-card">
+              <span className="eyebrow">{section.title}</span>
+              <p>{section.copy}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AnalysisSection({
+  current,
+  optimal,
+  strengths,
+  concerns,
+  monthlySummary,
+  sensitivity
+}: {
+  current: ScenarioMetrics;
+  optimal: ScenarioMetrics;
+  strengths: string[];
+  concerns: string[];
+  monthlySummary: MonthlySummary[];
+  sensitivity: SensitivityRow[];
+}) {
+  return (
+    <section id="analysis" className="content-section">
+      <SectionHeader
+        eyebrow="Solar chapter"
+        title="The solar analysis is one chapter of the full project"
+        description="This section shows the outputs generated by the reliable Turin simulation. It proves that the repository is not only a pipeline exercise, but also a real analytical project with interpretable results."
+      />
+
+      <div className="scenario-grid">
+        <ScenarioCard
+          title="Current baseline"
+          caption="The 3.0 kWp system is the configured baseline used to explain the starting point of the economic and production analysis."
+          scenario={current}
+          emphasis="neutral"
+        />
+        <ScenarioCard
+          title="Best tested size"
+          caption="The sizing sweep is useful in the portfolio because it shows how the project moves from simulation into real trade-off analysis."
+          scenario={optimal}
+          emphasis="highlight"
+        />
+      </div>
+
+      <div className="analysis-grid">
+        <SeasonalityChart data={monthlySummary} />
+        <RecommendationCard current={current} strengths={strengths} concerns={concerns} />
+      </div>
+
+      <div className="analysis-grid wide">
+        <CashFlowChart current={current} optimal={optimal} />
+        <SensitivityTable rows={sensitivity} />
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const summary = getAnalysisSummary();
   const current = summary.current_system;
   const optimal = summary.optimal_system;
+  const dagSteps = getDagSteps();
+  const stackItems = getStackItems();
+  const dataProducts = getDataProducts();
 
   const executiveMetrics = [
     {
-      label: "Annual production",
+      label: "Frameworks used",
+      value: `${stackItems.length}`,
+      hint: "Python, Kafka, PostgreSQL, Airflow, Docker, and Next.js/Vercel"
+    },
+    {
+      label: "Airflow stages",
+      value: `${dagSteps.length}`,
+      hint: "Explicit DAG chain from ingestion to monitoring"
+    },
+    {
+      label: "Data products",
+      value: `${dataProducts.length}`,
+      hint: "Bronze, silver, and gold analytical tables"
+    },
+    {
+      label: "Turin baseline",
       value: `${formatCompactNumber(current.year_one.annual_production_kwh)} kWh`,
-      hint: "Current calibrated 3.0 kWp baseline for Turin"
-    },
-    {
-      label: "Current payback",
-      value: current.payback_display,
-      hint: "Based on modeled load matching and price assumptions"
-    },
-    {
-      label: "Best-tested NPV",
-      value: formatCurrency(optimal.npv_25_years_euro),
-      hint: "Highest 25-year value across the sizing sweep"
-    },
-    {
-      label: "Direct demand coverage",
-      value: `${formatDecimal(current.year_one.demand_coverage_pct)}%`,
-      hint: "Solar share used directly by the household"
+      hint: "Reliable annual production for the calibrated 3.0 kWp system"
     }
   ];
 
@@ -559,45 +924,52 @@ export default function HomePage() {
     <main className="site-shell">
       <header className="site-header">
         <div className="brand">
-          <span className="brand-kicker">End-to-end project walkthrough</span>
-          <strong>Solar decision platform, simulation engine, and data pipeline</strong>
+          <span className="brand-kicker">Project portfolio</span>
+          <strong>Solar energy data pipeline and feasibility analysis</strong>
         </div>
         <nav className="main-nav">
-          <a href="#project-story">Project</a>
+          <a href="#roles">Roles</a>
+          <a href="#architecture">Architecture</a>
+          <a href="#aws">AWS</a>
+          <a href="#frameworks">Frameworks</a>
+          <a href="#structure">Structure</a>
           <a href="#analysis">Analysis</a>
-          <a href="#pipeline">Pipeline</a>
         </nav>
       </header>
 
       <section className="hero-section">
         <div className="hero-copy">
-          <span className="eyebrow">Decision platform + engineering case study</span>
-          <h1>
-            A decision-driven solar intelligence project designed to compare solar against the traditional energy model.
-          </h1>
+          <span className="eyebrow">End-to-end data engineering project</span>
+          <h1>A portfolio website built to explain the full project, not just show a dashboard.</h1>
           <p>
-            The project combines data engineering workflows, backend logic, simulation, analytics, and modern web
-            delivery. The result is a decision helper that shows how much can be saved, how solar compares to a
-            traditional grid-only setup, and which scenario is strongest under different business constraints.
+            This website now presents the repository as a complete project walkthrough: the architecture from the root
+            README, the frameworks used across each layer, the repository structure, and the solar analysis outputs that
+            sit on top of the pipeline.
           </p>
 
           <div className="hero-actions">
-            <a className="button primary" href="#analysis">
-              Open the analysis
+            <a className="button primary" href="#architecture">
+              View architecture
             </a>
-            <a className="button secondary" href="#pipeline">
-              Review architecture
+            <a className="button secondary" href="#analysis">
+              Open analysis chapter
             </a>
           </div>
 
           <div className="hero-meta">
-            <span>Verdict: {summary.verdict}</span>
-            <span>Score: {summary.score}/100</span>
+            <span>Simulation year: {summary.simulation_year}</span>
+            <span>Location: {summary.location.city}</span>
             <span>Updated: {new Date(summary.generated_at).toLocaleString("en-US")}</span>
           </div>
         </div>
 
-        <HeroPreview current={current} optimal={optimal} verdict={summary.verdict} score={summary.score} />
+        <PortfolioPreview
+          dagSteps={dagSteps}
+          stackItems={stackItems}
+          dataProducts={dataProducts}
+          simulationYear={summary.simulation_year}
+          location={summary.location.city}
+        />
       </section>
 
       <section className="metrics-grid">
@@ -606,44 +978,53 @@ export default function HomePage() {
         ))}
       </section>
 
-      <ProjectStorySection />
-
-      <section id="analysis" className="content-section">
+      <section className="content-section">
         <SectionHeader
-          eyebrow="Executive analysis"
-          title="The product surface: a decision room for clients, companies, and advisory conversations"
-          description="This is the user-facing layer of the project: clear recommendation logic, scenario steering, transparent trade-offs, and a direct comparison between solar and the traditional energy path."
+          eyebrow="Project framing"
+          title="The site is now structured as a reusable interview walkthrough"
+          description="Instead of behaving like a client-facing product demo, the homepage now explains what was built, how the repository is organized, which frameworks were used, and how the same project can support different interview narratives."
         />
 
-        <DecisionWorkbench current={current} optimal={optimal} sensitivity={summary.sensitivity} />
-
-        <div className="scenario-grid">
-          <ScenarioCard
-            title="Current recommendation"
-            caption="The configured residential baseline is financially solid and easy to defend when the buyer values a disciplined capex and a balanced payback profile."
-            scenario={current}
-            emphasis="neutral"
-          />
-          <ScenarioCard
-            title="Best tested system"
-            caption="The larger configuration creates stronger lifetime value, but it also pushes self-consumption down, which is exactly the kind of trade-off a proper advisory tool should expose."
-            scenario={optimal}
-            emphasis="highlight"
-          />
-        </div>
-
-        <div className="analysis-grid">
-          <SeasonalityChart data={summary.monthly_summary} />
-          <RecommendationCard current={current} strengths={summary.strengths} concerns={summary.concerns} />
-        </div>
-
-        <div className="analysis-grid wide">
-          <CashFlowChart current={current} optimal={optimal} />
-          <SensitivityTable rows={summary.sensitivity} />
+        <div className="story-grid">
+          {PORTFOLIO_SECTIONS.map((item) => (
+            <article key={item.title} className="story-card">
+              <span className="eyebrow">{item.title}</span>
+              <p>{item.copy}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <PipelineSection />
+      <RoleSection />
+      <ArchitectureSection />
+      <AwsSection />
+      <FrameworkSection />
+      <StructureSection />
+
+      <section className="content-section">
+        <SectionHeader
+          eyebrow="Engineering notes"
+          title="A few key improvements made the project explainable and reliable"
+          description="These points are useful during interviews because they show iteration, debugging, and judgment instead of only the final UI."
+        />
+
+        <div className="framework-grid compact">
+          {ENGINEERING_NOTES.map((note) => (
+            <article key={note} className="framework-card compact">
+              <p>{note}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <AnalysisSection
+        current={current}
+        optimal={optimal}
+        strengths={summary.strengths}
+        concerns={summary.concerns}
+        monthlySummary={summary.monthly_summary}
+        sensitivity={summary.sensitivity}
+      />
     </main>
   );
 }

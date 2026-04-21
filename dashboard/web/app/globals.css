@@ -927,6 +927,134 @@ code {
   grid-template-columns: 1.1fr 0.9fr;
 }
 
+.architecture-layout,
+.structure-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.code-panel {
+  overflow: hidden;
+}
+
+.ascii-diagram {
+  margin: 0;
+  padding: 18px;
+  overflow-x: auto;
+  border-radius: 18px;
+  background: #18222b;
+  color: #eef4f8;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.ascii-diagram code {
+  color: #eef4f8;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  white-space: pre;
+}
+
+.framework-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.framework-grid.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.framework-card {
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+
+.framework-card h3 {
+  margin: 8px 0 10px;
+  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  font-size: 1.35rem;
+}
+
+.framework-card p,
+.framework-card li {
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.framework-card ul {
+  margin: 14px 0 0;
+  padding-left: 18px;
+}
+
+.framework-card li {
+  margin-bottom: 8px;
+}
+
+.framework-card.compact {
+  padding: 18px;
+}
+
+.framework-card.compact p {
+  margin: 0;
+}
+
+.aws-placeholder-box {
+  display: grid;
+  place-items: center;
+  min-height: 360px;
+  padding: 28px;
+  border-radius: 18px;
+  border: 1px dashed rgba(23, 33, 43, 0.18);
+  background:
+    linear-gradient(135deg, rgba(15, 140, 140, 0.06), rgba(233, 169, 74, 0.08)),
+    rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+
+.aws-placeholder-box strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1.12rem;
+}
+
+.aws-placeholder-box p,
+.aws-map-card p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.aws-map {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.aws-map-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--paper-2);
+  border: 1px solid rgba(23, 33, 43, 0.06);
+}
+
+.aws-map-card strong,
+.aws-map-card span {
+  display: block;
+}
+
+.aws-map-card span {
+  margin-top: 6px;
+  color: var(--teal);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .scenario-card,
 .panel-card,
 .side-card,
@@ -1273,11 +1401,14 @@ tbody td {
   .hero-section,
   .workbench,
   .simulation-quadrant,
+  .architecture-layout,
+  .structure-layout,
   .story-grid,
   .scenario-grid,
   .analysis-grid,
   .analysis-grid.wide,
   .pipeline-layout,
+  .framework-grid,
   .ranking-grid {
     grid-template-columns: 1fr;
   }
@@ -1339,8 +1470,13 @@ tbody td {
   .preview-grid,
   .decision-grid,
   .control-grid,
-  .ranking-grid {
+  .ranking-grid,
+  .framework-grid.compact {
     grid-template-columns: 1fr;
+  }
+
+  .ascii-diagram {
+    font-size: 0.66rem;
   }
 
   .season-chart {
