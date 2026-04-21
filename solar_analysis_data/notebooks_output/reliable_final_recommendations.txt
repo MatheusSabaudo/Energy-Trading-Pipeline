@@ -1,0 +1,45 @@
+====================================================================
+TURIN SOLAR PV ANALYSIS - RELIABLE SIMULATION
+====================================================================
+
+Generated: 2026-04-21 12:24:56
+Simulation year: 2026
+Location: Turin, Italy
+
+VERDICT: RECOMMENDED
+Score: 65/100
+
+CURRENT SYSTEM
+  Size: 3.0 kWp
+  Annual production: 3948 kWh
+  Self-consumption: 29.2%
+  Demand coverage: 42.6%
+  Payback: 8 years
+  20-year net profit: EUR 11,628
+  25-year NPV: EUR 12,441
+
+BEST SIZE TESTED
+  Size: 6.0 kWp
+  Annual production: 7896 kWh
+  Self-consumption: 15.8%
+  Demand coverage: 46.1%
+  Payback: 9 years
+  20-year net profit: EUR 16,511
+  25-year NPV: EUR 17,511
+
+SEASONAL HIGHLIGHTS
+  Best production month: 05 with 452.3 kWh
+  Weakest production month: 12 with 151.5 kWh
+
+STRENGTHS
+  - Healthy payback within a typical asset horizon
+  - Strong 20-year ROI
+  - Meaningful reduction in grid purchases
+
+CONCERNS
+  - Low self-consumption reduces financial efficiency
+
+NOTES
+  - Weather is simulated hour by hour from Turin climate normals plus deterministic daily variation.
+  - Solar production uses sun position, clear-sky irradiance, cloud attenuation, tilt/orientation, and temperature derating.
+  - Financials use hourly self-consumption against a normalized residential load profile, not a fixed percentage guess.

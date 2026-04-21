@@ -1,0 +1,793 @@
+{
+  "generated_at": "2026-04-21T12:24:56",
+  "simulation_year": 2026,
+  "location": {
+    "city": "Turin",
+    "country": "Italy",
+    "latitude": 45.0703,
+    "longitude": 7.6869,
+    "timezone": "Europe/Rome",
+    "elevation_m": 239
+  },
+  "current_system": {
+    "panel_size_kw": 3.0,
+    "installation_cost_euro": 5400.0,
+    "year_one": {
+      "annual_production_kwh": 3947.8097270000035,
+      "annual_self_consumed_kwh": 1151.0462800000048,
+      "annual_exported_kwh": 2796.7634470000053,
+      "annual_imported_kwh": 1548.9536880000032,
+      "annual_load_kwh": 2699.99996799999,
+      "self_consumption_pct": 29.156579460446824,
+      "demand_coverage_pct": 42.631344208964414,
+      "production_coverage_pct": 146.21517680699537
+    },
+    "cash_flow": [
+      -5400.0,
+      660.8646712600024,
+      683.0804234448635,
+      705.9097045596593,
+      729.368792005378,
+      753.475830418643,
+      778.2487481576012,
+      803.7059236066871,
+      829.8668914321476,
+      856.7505390813311,
+      884.3776477591609,
+      912.7686066294216,
+      -258.0553781190324,
+      971.9279428047969,
+      1002.7412967879084,
+      1034.4077856385695,
+      1066.9510252263767,
+      1100.3948603731687,
+      1134.7654295917346,
+      1170.0872809207592,
+      1206.3877467256195,
+      1243.6949396704472,
+      1282.036107929247,
+      1321.4391856736268,
+      1361.9340738272572,
+      1403.5514794582307
+    ],
+    "cumulative": [
+      -5400.0,
+      -4739.135328739998,
+      -4056.0549052951346,
+      -3350.1452007354756,
+      -2620.7764087300975,
+      -1867.3005783114545,
+      -1089.0518301538532,
+      -285.3459065471661,
+      544.5209848849814,
+      1401.2715239663125,
+      2285.6491717254735,
+      3198.417778354895,
+      2940.3624002358624,
+      3912.2903430406595,
+      4915.031639828568,
+      5949.439425467137,
+      7016.390450693514,
+      8116.785311066683,
+      9251.550740658418,
+      10421.638021579178,
+      11628.025768304797,
+      12871.720707975244,
+      14153.756815904491,
+      15475.196001578119,
+      16837.130075405377,
+      18240.681554863608
+    ],
+    "yearly_snapshots": [
+      {
+        "year": 1,
+        "annual_production_kwh": 3947.8097270000035,
+        "annual_self_consumed_kwh": 1151.0462800000048,
+        "annual_exported_kwh": 2796.7634470000053,
+        "annual_imported_kwh": 1548.9536880000032,
+        "yearly_benefit_euro": 660.8646712600024
+      },
+      {
+        "year": 2,
+        "annual_production_kwh": 3928.0706783650076,
+        "annual_self_consumed_kwh": 1150.1110136950026,
+        "annual_exported_kwh": 2777.9596646699924,
+        "annual_imported_kwh": 1549.888954305004,
+        "yearly_benefit_euro": 683.0804234448635
+      },
+      {
+        "year": 3,
+        "annual_production_kwh": 3908.430324973181,
+        "annual_self_consumed_kwh": 1149.174468106203,
+        "annual_exported_kwh": 2759.255856866977,
+        "annual_imported_kwh": 1550.825499893805,
+        "yearly_benefit_euro": 705.9097045596593
+      },
+      {
+        "year": 4,
+        "annual_production_kwh": 3888.8881733483086,
+        "annual_self_consumed_kwh": 1148.2275250544214,
+        "annual_exported_kwh": 2740.660648293886,
+        "annual_imported_kwh": 1551.7724429455843,
+        "yearly_benefit_euro": 729.368792005378
+      },
+      {
+        "year": 5,
+        "annual_production_kwh": 3869.443732481571,
+        "annual_self_consumed_kwh": 1147.277550295975,
+        "annual_exported_kwh": 2722.166182185594,
+        "annual_imported_kwh": 1552.7224177040305,
+        "yearly_benefit_euro": 753.475830418643
+      },
+      {
+        "year": 6,
+        "annual_production_kwh": 3850.096513819163,
+        "annual_self_consumed_kwh": 1146.3234589054216,
+        "annual_exported_kwh": 2703.773054913737,
+        "annual_imported_kwh": 1553.6765090945846,
+        "yearly_benefit_euro": 778.2487481576012
+      },
+      {
+        "year": 7,
+        "annual_production_kwh": 3830.8460312500633,
+        "annual_self_consumed_kwh": 1145.363715519212,
+        "annual_exported_kwh": 2685.4823157308533,
+        "annual_imported_kwh": 1554.6362524807942,
+        "yearly_benefit_euro": 803.7059236066871
+      },
+      {
+        "year": 8,
+        "annual_production_kwh": 3811.691801093807,
+        "annual_self_consumed_kwh": 1144.4034425061936,
+        "annual_exported_kwh": 2667.2883585876266,
+        "annual_imported_kwh": 1555.5965254938153,
+        "yearly_benefit_euro": 829.8668914321476
+      },
+      {
+        "year": 9,
+        "annual_production_kwh": 3792.6333420883348,
+        "annual_self_consumed_kwh": 1143.4355229062558,
+        "annual_exported_kwh": 2649.1978191820854,
+        "annual_imported_kwh": 1556.5644450937516,
+        "yearly_benefit_euro": 856.7505390813311
+      },
+      {
+        "year": 10,
+        "annual_production_kwh": 3773.670175377896,
+        "annual_self_consumed_kwh": 1142.4665388383828,
+        "annual_exported_kwh": 2631.203636539528,
+        "annual_imported_kwh": 1557.5334291616275,
+        "yearly_benefit_euro": 884.3776477591609
+      },
+      {
+        "year": 11,
+        "annual_production_kwh": 3754.801824501017,
+        "annual_self_consumed_kwh": 1141.4934315765274,
+        "annual_exported_kwh": 2613.3083929244794,
+        "annual_imported_kwh": 1558.5065364234804,
+        "yearly_benefit_euro": 912.7686066294216
+      },
+      {
+        "year": 12,
+        "annual_production_kwh": 3736.0278153785093,
+        "annual_self_consumed_kwh": 1140.5156252068705,
+        "annual_exported_kwh": 2595.5121901716375,
+        "annual_imported_kwh": 1559.4843427931353,
+        "yearly_benefit_euro": -258.0553781190324
+      },
+      {
+        "year": 13,
+        "annual_production_kwh": 3717.347676301617,
+        "annual_self_consumed_kwh": 1139.5365289926797,
+        "annual_exported_kwh": 2577.8111473089375,
+        "annual_imported_kwh": 1560.4634390073275,
+        "yearly_benefit_euro": 971.9279428047969
+      },
+      {
+        "year": 14,
+        "annual_production_kwh": 3698.760937920113,
+        "annual_self_consumed_kwh": 1138.558009514845,
+        "annual_exported_kwh": 2560.2029284052646,
+        "annual_imported_kwh": 1561.4419584851616,
+        "yearly_benefit_euro": 1002.7412967879084
+      },
+      {
+        "year": 15,
+        "annual_production_kwh": 3680.2671332305017,
+        "annual_self_consumed_kwh": 1137.579586910102,
+        "annual_exported_kwh": 2542.687546320407,
+        "annual_imported_kwh": 1562.4203810899073,
+        "yearly_benefit_euro": 1034.4077856385695
+      },
+      {
+        "year": 16,
+        "annual_production_kwh": 3661.8657975643587,
+        "annual_self_consumed_kwh": 1136.5997377724573,
+        "annual_exported_kwh": 2525.2660597919066,
+        "annual_imported_kwh": 1563.4002302275512,
+        "yearly_benefit_euro": 1066.9510252263767
+      },
+      {
+        "year": 17,
+        "annual_production_kwh": 3643.556468576539,
+        "annual_self_consumed_kwh": 1135.613686720699,
+        "annual_exported_kwh": 2507.9427818558324,
+        "annual_imported_kwh": 1564.3862812793027,
+        "yearly_benefit_euro": 1100.3948603731687
+      },
+      {
+        "year": 18,
+        "annual_production_kwh": 3625.3386862336492,
+        "annual_self_consumed_kwh": 1134.6293646556906,
+        "annual_exported_kwh": 2490.70932157796,
+        "annual_imported_kwh": 1565.370603344319,
+        "yearly_benefit_euro": 1134.7654295917346
+      },
+      {
+        "year": 19,
+        "annual_production_kwh": 3607.2119928024813,
+        "annual_self_consumed_kwh": 1133.6369369430615,
+        "annual_exported_kwh": 2473.575055859426,
+        "annual_imported_kwh": 1566.3630310569442,
+        "yearly_benefit_euro": 1170.0872809207592
+      },
+      {
+        "year": 20,
+        "annual_production_kwh": 3589.1759328384715,
+        "annual_self_consumed_kwh": 1132.6423681585513,
+        "annual_exported_kwh": 2456.5335646799244,
+        "annual_imported_kwh": 1567.3575998414567,
+        "yearly_benefit_euro": 1206.3877467256195
+      },
+      {
+        "year": 21,
+        "annual_production_kwh": 3571.2300531742762,
+        "annual_self_consumed_kwh": 1131.6511918785577,
+        "annual_exported_kwh": 2439.578861295719,
+        "annual_imported_kwh": 1568.348776121447,
+        "yearly_benefit_euro": 1243.6949396704472
+      },
+      {
+        "year": 22,
+        "annual_production_kwh": 3553.3739029084118,
+        "annual_self_consumed_kwh": 1130.657330526977,
+        "annual_exported_kwh": 2422.716572381426,
+        "annual_imported_kwh": 1569.3426374730273,
+        "yearly_benefit_euro": 1282.036107929247
+      },
+      {
+        "year": 23,
+        "annual_production_kwh": 3535.607033393868,
+        "annual_self_consumed_kwh": 1129.6547126057055,
+        "annual_exported_kwh": 2405.952320788159,
+        "annual_imported_kwh": 1570.3452553942998,
+        "yearly_benefit_euro": 1321.4391856736268
+      },
+      {
+        "year": 24,
+        "annual_production_kwh": 3517.928998226893,
+        "annual_self_consumed_kwh": 1128.6452924409023,
+        "annual_exported_kwh": 2389.2837057859992,
+        "annual_imported_kwh": 1571.3546755591053,
+        "yearly_benefit_euro": 1361.9340738272572
+      },
+      {
+        "year": 25,
+        "annual_production_kwh": 3500.3393532357763,
+        "annual_self_consumed_kwh": 1127.6306550260294,
+        "annual_exported_kwh": 2372.708698209735,
+        "annual_imported_kwh": 1572.3693129739743,
+        "yearly_benefit_euro": 1403.5514794582307
+      }
+    ],
+    "payback_years": 8,
+    "payback_display": "8 years",
+    "roi_20_years": 215.33381052416289,
+    "net_profit_20_years_euro": 11628.025768304797,
+    "total_benefit_20_years_euro": 17028.025768304797,
+    "npv_25_years_euro": 12440.554082782497,
+    "grid_cost_20_years_euro": 21765.003078118505,
+    "net_benefit_vs_grid_20_years_euro": 11628.025768304797,
+    "break_even_rate_euro_per_kwh": 0.12190965536155408
+  },
+  "optimal_system": {
+    "panel_size_kw": 6.0,
+    "installation_cost_euro": 10800.0,
+    "year_one": {
+      "annual_production_kwh": 7895.619454000007,
+      "annual_self_consumed_kwh": 1245.6391670000046,
+      "annual_exported_kwh": 6649.980287000003,
+      "annual_imported_kwh": 1454.3608010000055,
+      "annual_load_kwh": 2699.99996799999,
+      "self_consumption_pct": 15.776332360711107,
+      "demand_coverage_pct": 46.134784509745934,
+      "production_coverage_pct": 292.43035361399075
+    },
+    "cash_flow": [
+      -10800.0,
+      1063.2130749200023,
+      1095.5024318742176,
+      1128.6577602718696,
+      1162.7027487541127,
+      1197.6613216042222,
+      1233.5583824833532,
+      1270.4192614573426,
+      1308.2697905610316,
+      1347.1371769518298,
+      1387.0489827350448,
+      1428.0332061593087,
+      270.11914680146833,
+      1513.3369194714626,
+      1557.7170416882243,
+      1603.2906814095074,
+      1650.0906911241068,
+      1698.1495850948231,
+      1747.5021171150665,
+      1798.182856775902,
+      1850.228608742311,
+      1903.676202867041,
+      1958.5634468690587,
+      2014.9292388162344,
+      2072.8133788489868,
+      2132.2578416282236
+    ],
+    "cumulative": [
+      -10800.0,
+      -9736.786925079998,
+      -8641.28449320578,
+      -7512.62673293391,
+      -6349.923984179797,
+      -5152.262662575575,
+      -3918.704280092222,
+      -2648.285018634879,
+      -1340.0152280738475,
+      7.121948877982277,
+      1394.170931613027,
+      2822.204137772336,
+      3092.323284573804,
+      4605.660204045266,
+      6163.377245733491,
+      7766.667927142998,
+      9416.758618267106,
+      11114.908203361929,
+      12862.410320476996,
+      14660.593177252898,
+      16510.82178599521,
+      18414.49798886225,
+      20373.06143573131,
+      22387.990674547545,
+      24460.804053396532,
+      26593.061895024755
+    ],
+    "yearly_snapshots": [
+      {
+        "year": 1,
+        "annual_production_kwh": 7895.619454000007,
+        "annual_self_consumed_kwh": 1245.6391670000046,
+        "annual_exported_kwh": 6649.980287000003,
+        "annual_imported_kwh": 1454.3608010000055,
+        "yearly_benefit_euro": 1063.2130749200023
+      },
+      {
+        "year": 2,
+        "annual_production_kwh": 7856.141356730015,
+        "annual_self_consumed_kwh": 1245.1441272600052,
+        "annual_exported_kwh": 6610.997229470015,
+        "annual_imported_kwh": 1454.855840740004,
+        "yearly_benefit_euro": 1095.5024318742176
+      },
+      {
+        "year": 3,
+        "annual_production_kwh": 7816.860649946362,
+        "annual_self_consumed_kwh": 1244.6439107469544,
+        "annual_exported_kwh": 6572.216739199401,
+        "annual_imported_kwh": 1455.3560572530555,
+        "yearly_benefit_euro": 1128.6577602718696
+      },
+      {
+        "year": 4,
+        "annual_production_kwh": 7777.776346696617,
+        "annual_self_consumed_kwh": 1244.1417612828543,
+        "annual_exported_kwh": 6533.634585413775,
+        "annual_imported_kwh": 1455.8582067171556,
+        "yearly_benefit_euro": 1162.7027487541127
+      },
+      {
+        "year": 5,
+        "annual_production_kwh": 7738.887464963142,
+        "annual_self_consumed_kwh": 1243.6360820746975,
+        "annual_exported_kwh": 6495.251382888442,
+        "annual_imported_kwh": 1456.3638859253128,
+        "yearly_benefit_euro": 1197.6613216042222
+      },
+      {
+        "year": 6,
+        "annual_production_kwh": 7700.193027638326,
+        "annual_self_consumed_kwh": 1243.1289439331474,
+        "annual_exported_kwh": 6457.064083705172,
+        "annual_imported_kwh": 1456.8710240668652,
+        "yearly_benefit_euro": 1233.5583824833532
+      },
+      {
+        "year": 7,
+        "annual_production_kwh": 7661.692062500127,
+        "annual_self_consumed_kwh": 1242.6195868841482,
+        "annual_exported_kwh": 6419.072475615995,
+        "annual_imported_kwh": 1457.3803811158634,
+        "yearly_benefit_euro": 1270.4192614573426
+      },
+      {
+        "year": 8,
+        "annual_production_kwh": 7623.383602187614,
+        "annual_self_consumed_kwh": 1242.1053946857505,
+        "annual_exported_kwh": 6381.278207501886,
+        "annual_imported_kwh": 1457.8945733142596,
+        "yearly_benefit_euro": 1308.2697905610316
+      },
+      {
+        "year": 9,
+        "annual_production_kwh": 7585.2666841766695,
+        "annual_self_consumed_kwh": 1241.5905992850192,
+        "annual_exported_kwh": 6343.676084891664,
+        "annual_imported_kwh": 1458.4093687149898,
+        "yearly_benefit_euro": 1347.1371769518298
+      },
+      {
+        "year": 10,
+        "annual_production_kwh": 7547.340350755792,
+        "annual_self_consumed_kwh": 1241.075344553831,
+        "annual_exported_kwh": 6306.265006201975,
+        "annual_imported_kwh": 1458.9246234461796,
+        "yearly_benefit_euro": 1387.0489827350448
+      },
+      {
+        "year": 11,
+        "annual_production_kwh": 7509.603649002034,
+        "annual_self_consumed_kwh": 1240.5568143488138,
+        "annual_exported_kwh": 6269.046834653231,
+        "annual_imported_kwh": 1459.4431536511963,
+        "yearly_benefit_euro": 1428.0332061593087
+      },
+      {
+        "year": 12,
+        "annual_production_kwh": 7472.055630757019,
+        "annual_self_consumed_kwh": 1240.0372879838853,
+        "annual_exported_kwh": 6232.0183427731345,
+        "annual_imported_kwh": 1459.9626800161238,
+        "yearly_benefit_euro": 270.11914680146833
+      },
+      {
+        "year": 13,
+        "annual_production_kwh": 7434.695352603234,
+        "annual_self_consumed_kwh": 1239.5189734889666,
+        "annual_exported_kwh": 6195.176379114277,
+        "annual_imported_kwh": 1460.4809945110437,
+        "yearly_benefit_euro": 1513.3369194714626
+      },
+      {
+        "year": 14,
+        "annual_production_kwh": 7397.521875840226,
+        "annual_self_consumed_kwh": 1239.0003015344776,
+        "annual_exported_kwh": 6158.5215743057415,
+        "annual_imported_kwh": 1460.999666465532,
+        "yearly_benefit_euro": 1557.7170416882243
+      },
+      {
+        "year": 15,
+        "annual_production_kwh": 7360.534266461003,
+        "annual_self_consumed_kwh": 1238.4783181197745,
+        "annual_exported_kwh": 6122.055948341241,
+        "annual_imported_kwh": 1461.5216498802351,
+        "yearly_benefit_euro": 1603.2906814095074
+      },
+      {
+        "year": 16,
+        "annual_production_kwh": 7323.731595128717,
+        "annual_self_consumed_kwh": 1237.9570102843595,
+        "annual_exported_kwh": 6085.774584844359,
+        "annual_imported_kwh": 1462.0429577156526,
+        "yearly_benefit_euro": 1650.0906911241068
+      },
+      {
+        "year": 17,
+        "annual_production_kwh": 7287.112937153078,
+        "annual_self_consumed_kwh": 1237.4303786144628,
+        "annual_exported_kwh": 6049.682558538601,
+        "annual_imported_kwh": 1462.569589385546,
+        "yearly_benefit_euro": 1698.1495850948231
+      },
+      {
+        "year": 18,
+        "annual_production_kwh": 7250.6773724672985,
+        "annual_self_consumed_kwh": 1236.9031684144186,
+        "annual_exported_kwh": 6013.774204052889,
+        "annual_imported_kwh": 1463.0967995855929,
+        "yearly_benefit_euro": 1747.5021171150665
+      },
+      {
+        "year": 19,
+        "annual_production_kwh": 7214.423985604963,
+        "annual_self_consumed_kwh": 1236.3713750018642,
+        "annual_exported_kwh": 5978.0526106031175,
+        "annual_imported_kwh": 1463.6285929981489,
+        "yearly_benefit_euro": 1798.182856775902
+      },
+      {
+        "year": 20,
+        "annual_production_kwh": 7178.351865676943,
+        "annual_self_consumed_kwh": 1235.840540843782,
+        "annual_exported_kwh": 5942.511324833142,
+        "annual_imported_kwh": 1464.1594271562278,
+        "yearly_benefit_euro": 1850.228608742311
+      },
+      {
+        "year": 21,
+        "annual_production_kwh": 7142.4601063485525,
+        "annual_self_consumed_kwh": 1235.3089210259902,
+        "annual_exported_kwh": 5907.151185322569,
+        "annual_imported_kwh": 1464.6910469740203,
+        "yearly_benefit_euro": 1903.676202867041
+      },
+      {
+        "year": 22,
+        "annual_production_kwh": 7106.7478058168235,
+        "annual_self_consumed_kwh": 1234.7747166386907,
+        "annual_exported_kwh": 5871.973089178139,
+        "annual_imported_kwh": 1465.2252513613207,
+        "yearly_benefit_euro": 1958.5634468690587
+      },
+      {
+        "year": 23,
+        "annual_production_kwh": 7071.214066787736,
+        "annual_self_consumed_kwh": 1234.2366480107576,
+        "annual_exported_kwh": 5836.977418776981,
+        "annual_imported_kwh": 1465.7633199892537,
+        "yearly_benefit_euro": 2014.9292388162344
+      },
+      {
+        "year": 24,
+        "annual_production_kwh": 7035.857996453786,
+        "annual_self_consumed_kwh": 1233.6925194565943,
+        "annual_exported_kwh": 5802.16547699721,
+        "annual_imported_kwh": 1466.3074485434174,
+        "yearly_benefit_euro": 2072.8133788489868
+      },
+      {
+        "year": 25,
+        "annual_production_kwh": 7000.678706471553,
+        "annual_self_consumed_kwh": 1233.1470064395394,
+        "annual_exported_kwh": 5767.531700031972,
+        "annual_imported_kwh": 1466.8529615604693,
+        "yearly_benefit_euro": 2132.2578416282236
+      }
+    ],
+    "payback_years": 9,
+    "payback_display": "9 years",
+    "roi_20_years": 152.87797949995564,
+    "net_profit_20_years_euro": 16510.82178599521,
+    "total_benefit_20_years_euro": 27310.821785995206,
+    "npv_25_years_euro": 17510.820897677437,
+    "grid_cost_20_years_euro": 21765.003078118505,
+    "net_benefit_vs_grid_20_years_euro": 16510.82178599521,
+    "break_even_rate_euro_per_kwh": 0.02007160015706186
+  },
+  "sensitivity": [
+    {
+      "panel_size_kw": 2.0,
+      "annual_production_kwh": 2631.9,
+      "self_consumption_pct": 40.5,
+      "demand_coverage_pct": 39.5,
+      "installation_cost_euro": 3600.0,
+      "payback_years": "7 years",
+      "npv_25_years_euro": 9879.0
+    },
+    {
+      "panel_size_kw": 2.5,
+      "annual_production_kwh": 3289.8,
+      "self_consumption_pct": 33.9,
+      "demand_coverage_pct": 41.3,
+      "installation_cost_euro": 4500.0,
+      "payback_years": "7 years",
+      "npv_25_years_euro": 11548.0
+    },
+    {
+      "panel_size_kw": 3.0,
+      "annual_production_kwh": 3947.8,
+      "self_consumption_pct": 29.2,
+      "demand_coverage_pct": 42.6,
+      "installation_cost_euro": 5400.0,
+      "payback_years": "8 years",
+      "npv_25_years_euro": 12441.0
+    },
+    {
+      "panel_size_kw": 3.5,
+      "annual_production_kwh": 4605.8,
+      "self_consumption_pct": 25.6,
+      "demand_coverage_pct": 43.7,
+      "installation_cost_euro": 6300.0,
+      "payback_years": "8 years",
+      "npv_25_years_euro": 13312.0
+    },
+    {
+      "panel_size_kw": 4.0,
+      "annual_production_kwh": 5263.7,
+      "self_consumption_pct": 22.8,
+      "demand_coverage_pct": 44.4,
+      "installation_cost_euro": 7200.0,
+      "payback_years": "9 years",
+      "npv_25_years_euro": 14169.0
+    },
+    {
+      "panel_size_kw": 4.5,
+      "annual_production_kwh": 5921.7,
+      "self_consumption_pct": 20.5,
+      "demand_coverage_pct": 45.0,
+      "installation_cost_euro": 8100.0,
+      "payback_years": "9 years",
+      "npv_25_years_euro": 15013.0
+    },
+    {
+      "panel_size_kw": 5.0,
+      "annual_production_kwh": 6579.7,
+      "self_consumption_pct": 18.6,
+      "demand_coverage_pct": 45.4,
+      "installation_cost_euro": 9000.0,
+      "payback_years": "9 years",
+      "npv_25_years_euro": 15850.0
+    },
+    {
+      "panel_size_kw": 6.0,
+      "annual_production_kwh": 7895.6,
+      "self_consumption_pct": 15.8,
+      "demand_coverage_pct": 46.1,
+      "installation_cost_euro": 10800.0,
+      "payback_years": "9 years",
+      "npv_25_years_euro": 17511.0
+    }
+  ],
+  "monthly_summary": [
+    {
+      "month": 1,
+      "avg_temperature_c": 3.32,
+      "avg_cloud_cover_pct": 58.1,
+      "avg_ghi_wm2": 72.6,
+      "production_kwh": 199.4,
+      "load_kwh": 252.0,
+      "self_consumed_kwh": 73.6,
+      "grid_export_kwh": 125.8,
+      "grid_import_kwh": 178.4
+    },
+    {
+      "month": 2,
+      "avg_temperature_c": 6.83,
+      "avg_cloud_cover_pct": 52.3,
+      "avg_ghi_wm2": 115.3,
+      "production_kwh": 244.0,
+      "load_kwh": 224.9,
+      "self_consumed_kwh": 78.9,
+      "grid_export_kwh": 165.1,
+      "grid_import_kwh": 146.0
+    },
+    {
+      "month": 3,
+      "avg_temperature_c": 10.58,
+      "avg_cloud_cover_pct": 46.7,
+      "avg_ghi_wm2": 185.1,
+      "production_kwh": 356.5,
+      "load_kwh": 241.0,
+      "self_consumed_kwh": 102.2,
+      "grid_export_kwh": 254.3,
+      "grid_import_kwh": 138.7
+    },
+    {
+      "month": 4,
+      "avg_temperature_c": 14.87,
+      "avg_cloud_cover_pct": 51.6,
+      "avg_ghi_wm2": 247.8,
+      "production_kwh": 386.4,
+      "load_kwh": 222.1,
+      "self_consumed_kwh": 109.7,
+      "grid_export_kwh": 276.7,
+      "grid_import_kwh": 112.3
+    },
+    {
+      "month": 5,
+      "avg_temperature_c": 19.06,
+      "avg_cloud_cover_pct": 38.5,
+      "avg_ghi_wm2": 318.3,
+      "production_kwh": 452.3,
+      "load_kwh": 218.5,
+      "self_consumed_kwh": 120.4,
+      "grid_export_kwh": 331.9,
+      "grid_import_kwh": 98.0
+    },
+    {
+      "month": 6,
+      "avg_temperature_c": 22.35,
+      "avg_cloud_cover_pct": 39.2,
+      "avg_ghi_wm2": 339.5,
+      "production_kwh": 439.6,
+      "load_kwh": 202.9,
+      "self_consumed_kwh": 116.8,
+      "grid_export_kwh": 322.8,
+      "grid_import_kwh": 86.1
+    },
+    {
+      "month": 7,
+      "avg_temperature_c": 23.81,
+      "avg_cloud_cover_pct": 35.9,
+      "avg_ghi_wm2": 333.0,
+      "production_kwh": 451.5,
+      "load_kwh": 206.5,
+      "self_consumed_kwh": 118.1,
+      "grid_export_kwh": 333.3,
+      "grid_import_kwh": 88.3
+    },
+    {
+      "month": 8,
+      "avg_temperature_c": 21.33,
+      "avg_cloud_cover_pct": 37.0,
+      "avg_ghi_wm2": 284.0,
+      "production_kwh": 427.6,
+      "load_kwh": 210.0,
+      "self_consumed_kwh": 110.5,
+      "grid_export_kwh": 317.1,
+      "grid_import_kwh": 99.5
+    },
+    {
+      "month": 9,
+      "avg_temperature_c": 16.75,
+      "avg_cloud_cover_pct": 45.9,
+      "avg_ghi_wm2": 206.5,
+      "production_kwh": 353.5,
+      "load_kwh": 210.9,
+      "self_consumed_kwh": 96.7,
+      "grid_export_kwh": 256.8,
+      "grid_import_kwh": 114.2
+    },
+    {
+      "month": 10,
+      "avg_temperature_c": 10.67,
+      "avg_cloud_cover_pct": 50.9,
+      "avg_ghi_wm2": 130.4,
+      "production_kwh": 285.1,
+      "load_kwh": 229.5,
+      "self_consumed_kwh": 86.8,
+      "grid_export_kwh": 198.3,
+      "grid_import_kwh": 142.7
+    },
+    {
+      "month": 11,
+      "avg_temperature_c": 6.1,
+      "avg_cloud_cover_pct": 58.3,
+      "avg_ghi_wm2": 79.0,
+      "production_kwh": 200.3,
+      "load_kwh": 233.1,
+      "self_consumed_kwh": 70.9,
+      "grid_export_kwh": 129.4,
+      "grid_import_kwh": 162.2
+    },
+    {
+      "month": 12,
+      "avg_temperature_c": 3.46,
+      "avg_cloud_cover_pct": 69.2,
+      "avg_ghi_wm2": 53.9,
+      "production_kwh": 151.5,
+      "load_kwh": 248.8,
+      "self_consumed_kwh": 66.3,
+      "grid_export_kwh": 85.2,
+      "grid_import_kwh": 182.5
+    }
+  ],
+  "score": 65,
+  "verdict": "RECOMMENDED",
+  "strengths": [
+    "Healthy payback within a typical asset horizon",
+    "Strong 20-year ROI",
+    "Meaningful reduction in grid purchases"
+  ],
+  "concerns": [
+    "Low self-consumption reduces financial efficiency"
+  ],
+  "dataset_path": "data/turin_hourly_simulated_2026.csv"
+}
