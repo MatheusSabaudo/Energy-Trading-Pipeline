@@ -5,3 +5,4 @@ __pycache__/
 node_modules/
 .next/
 .vercel/
+populate_day_repo.py
